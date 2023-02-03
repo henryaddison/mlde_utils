@@ -2,8 +2,6 @@ from contextlib import contextmanager
 import logging
 import os
 
-import torch
-
 
 def log_epoch(epoch, epoch_metrics, wandb_run, tb_writer):
     import mlflow
@@ -19,6 +17,8 @@ def log_epoch(epoch, epoch_metrics, wandb_run, tb_writer):
 
 
 def restore_checkpoint(ckpt_dir, state, device):
+    import torch
+
     if not os.path.exists(ckpt_dir):
         os.makedirs(os.path.dirname(ckpt_dir), exist_ok=True)
         logging.warning(
@@ -35,6 +35,8 @@ def restore_checkpoint(ckpt_dir, state, device):
 
 
 def save_checkpoint(ckpt_dir, state):
+    import torch
+
     saved_state = {
         "optimizer": state["optimizer"].state_dict(),
         "model": state["model"].state_dict(),
