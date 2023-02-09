@@ -46,7 +46,7 @@ def plot_map(da, ax, title="", style="logBlues", add_colorbar=False, **kwargs):
     return pcm
 
 
-def freq_density_plot(ax, ds, target_pr, diagnostics=False):
+def freq_density_plot(ax, ds, target_pr, grouping_key="model", diagnostics=False):
     pred_pr = ds["pred_pr"]
 
     hrange = (
@@ -63,14 +63,14 @@ def freq_density_plot(ax, ds, target_pr, diagnostics=False):
         log=True,
         range=hrange,
     )
-    for model in pred_pr["model"].values:
-        pred_pr.sel(model=model).plot.hist(
+    for group_value in pred_pr[grouping_key].values:
+        pred_pr.sel({grouping_key: group_value}).plot.hist(
             ax=ax,
             bins=bins,
             density=True,
             alpha=0.75,
             histtype="step",
-            label=f"{model}",
+            label=f"{grouping_key} {group_value}",
             log=True,
             range=hrange,
             linewidth=2,
@@ -109,10 +109,11 @@ def qq_plot(
     title="Sample vs Target quantiles",
     xlabel="Target precip (mm day-1)",
     ylabel="Sample precip (mm day-1)",
+    grouping_key="model",
     **scatter_args,
 ):
-    labels = ds["model"].values
-    pred_prs = [ds["pred_pr"].sel(model=model) for model in labels]
+    labels = ds[grouping_key].values
+    pred_prs = [ds["pred_pr"].sel({grouping_key: value}) for value in labels]
     x_quantiles = target_pr.quantile(quantiles)
     ideal_tr = max(
         target_pr.max().values, *[y.max().values for y in pred_prs]

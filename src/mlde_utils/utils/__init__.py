@@ -152,20 +152,24 @@ def show_samples(ds, timestamps):
         plt.show()
 
 
-def distribution_figure(ds, target_pr, quantiles, figtitle, diagnostics=False):
+def distribution_figure(
+    ds, target_pr, quantiles, figtitle, grouping_key="model", diagnostics=False
+):
     fig, axes = plt.subplot_mosaic(
         [["Density", "Quantiles"]], figsize=(16.5, 5.5), constrained_layout=True
     )
 
     ax = axes["Density"]
-    freq_density_plot(ax, ds, target_pr, diagnostics=diagnostics)
+    freq_density_plot(
+        ax, ds, target_pr, diagnostics=diagnostics, grouping_key=grouping_key
+    )
 
     ax = axes["Quantiles"]
-    qq_plot(ax, target_pr, ds, quantiles)
+    qq_plot(ax, target_pr, ds, quantiles, grouping_key=grouping_key)
     plt.show()
 
 
-def seasonal_distribution_figure(ds, target_pr, quantiles):
+def seasonal_distribution_figure(ds, target_pr, quantiles, grouping_key="model"):
     fig, axes = plt.subplot_mosaic(
         [["Quantiles DJF", "Quantiles MAM", "Quantiles JJA", "Quantiles SON"]],
         figsize=(22, 5.5),
@@ -181,6 +185,7 @@ def seasonal_distribution_figure(ds, target_pr, quantiles):
             seasonal_ds,
             quantiles,
             title=f"Sample vs Target {season} quantiles",
+            grouping_key=grouping_key,
         )
     plt.show()
 
