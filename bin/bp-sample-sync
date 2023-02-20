@@ -15,6 +15,6 @@ local_path="${DERIVED_DATA}/${samples_path}"
 mkdir -p ${local_path}
 
 set -x
-rsync -avhz --delete --dry-run ${bp_host}:${bp_path} ${local_path}
+rsync -avhz ${bp_host}:${bp_path} ${local_path}
 
 mlde-data sample ${local_path}/*/*/*.nc
