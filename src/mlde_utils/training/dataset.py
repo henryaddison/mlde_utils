@@ -82,7 +82,7 @@ def get_dataset(
     xr_data = transform.transform(xr_data)
     xr_data = target_transform.transform(xr_data)
     xr_dataset = XRDataset(xr_data, variables, target_variables)
-    data_loader = DataLoader(xr_dataset, batch_size=batch_size)
+    data_loader = DataLoader(xr_dataset, batch_size=batch_size, shuffle=True)
 
     return data_loader, transform, target_transform
 
