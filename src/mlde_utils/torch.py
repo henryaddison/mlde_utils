@@ -11,20 +11,20 @@ class XRDataset(Dataset):
         self.variables = variables
         self.target_variables = target_variables
 
+    @classmethod
+    def to_tensor(cls, ds, variables):
+        return torch.tensor(
+            # stack features before lat-lon (HW)
+            np.stack([ds[var].values for var in variables], axis=-3)
+        ).float()
+
     def __len__(self):
         return len(self.ds.time)
 
     def __getitem__(self, idx):
         subds = self.ds.isel(time=idx)
-
-        cond = torch.tensor(
-            np.stack([subds[var].values for var in self.variables], axis=0)
-        ).float()
-
-        x = torch.tensor(
-            np.stack([subds[var].values for var in self.target_variables], axis=0)
-        ).float()
-
+        cond = self.to_tensor(subds, self.variables)
+        x = self.to_tensor(subds, self.target_variables)
         return cond, x
 
 
