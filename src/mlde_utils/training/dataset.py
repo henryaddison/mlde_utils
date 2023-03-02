@@ -3,10 +3,6 @@ import logging
 import os
 import yaml
 
-from flufl.lock import Lock
-import numpy as np
-import torch
-from torch.utils.data import Dataset, DataLoader
 import xarray as xr
 
 from ..transforms import (
@@ -15,29 +11,6 @@ from ..transforms import (
     save_transform,
     load_transform,
 )
-
-
-class XRDataset(Dataset):
-    def __init__(self, ds, variables, target_variables):
-        self.ds = ds
-        self.variables = variables
-        self.target_variables = target_variables
-
-    def __len__(self):
-        return len(self.ds.time)
-
-    def __getitem__(self, idx):
-        subds = self.ds.isel(time=idx)
-
-        cond = torch.tensor(
-            np.stack([subds[var].values for var in self.variables], axis=0)
-        ).float()
-
-        x = torch.tensor(
-            np.stack([subds[var].values for var in self.target_variables], axis=0)
-        ).float()
-
-        return cond, x
 
 
 def get_dataset(
@@ -77,14 +50,10 @@ def get_dataset(
 
     xr_data = load_raw_dataset_split(active_dataset_name, split)
 
-    variables, target_variables = get_variables(model_src_dataset_name)
-
     xr_data = transform.transform(xr_data)
     xr_data = target_transform.transform(xr_data)
-    xr_dataset = XRDataset(xr_data, variables, target_variables)
-    data_loader = DataLoader(xr_dataset, batch_size=batch_size, shuffle=True)
 
-    return data_loader, transform, target_transform
+    return xr_data, transform, target_transform
 
 
 def load_raw_dataset_split(dataset_name, split):
@@ -107,13 +76,12 @@ def get_variables(dataset_name):
     return variables, target_variables
 
 
-def _create_transform(
+def _build_transform(
     variables,
     active_dataset_name,
     model_src_dataset_name,
     transform_key,
     builder,
-    store_path,
 ):
     logging.info(f"Fitting transform")
     model_src_training_split = load_raw_dataset_split(model_src_dataset_name, "train")
@@ -123,8 +91,6 @@ def _create_transform(
     xfm = builder(variables, key=transform_key)
 
     xfm.fit(active_dataset_training_split, model_src_training_split)
-
-    save_transform(xfm, store_path)
 
     return xfm
 
@@ -137,42 +103,63 @@ def _find_or_create_transforms(
     target_transform_key,
     evaluation,
 ):
-    dataset_transform_dir = os.path.join(transform_dir, active_dataset_name)
-    os.makedirs(dataset_transform_dir, exist_ok=True)
-    input_transform_path = os.path.join(dataset_transform_dir, "input.pickle")
-    target_transform_path = os.path.join(transform_dir, "target.pickle")
-
     variables, target_variables = get_variables(model_src_dataset_name)
 
-    lock_path = os.path.join(transform_dir, ".lock")
-    lock = Lock(lock_path, lifetime=timedelta(hours=1))
-    with lock:
-        if os.path.exists(input_transform_path):
-            input_transform = load_transform(input_transform_path)
-        else:
-            input_transform = _create_transform(
-                variables,
-                active_dataset_name,
-                model_src_dataset_name,
-                input_transform_key,
-                build_input_transform,
-                input_transform_path,
-            )
+    if transform_dir is None:
+        input_transform = _build_transform(
+            variables,
+            active_dataset_name,
+            model_src_dataset_name,
+            input_transform_key,
+            build_input_transform,
+        )
 
-        if os.path.exists(target_transform_path):
-            target_transform = load_transform(target_transform_path)
-        else:
-            if evaluation:
-                raise RuntimeError(
-                    "Target transform should only be fitted during training"
+        if evaluation:
+            raise RuntimeError("Target transform should only be fitted during training")
+        target_transform = _build_transform(
+            target_variables,
+            active_dataset_name,
+            model_src_dataset_name,
+            target_transform_key,
+            build_target_transform,
+        )
+    else:
+        from flufl.lock import Lock
+
+        dataset_transform_dir = os.path.join(transform_dir, active_dataset_name)
+        os.makedirs(dataset_transform_dir, exist_ok=True)
+        input_transform_path = os.path.join(dataset_transform_dir, "input.pickle")
+        target_transform_path = os.path.join(transform_dir, "target.pickle")
+
+        lock_path = os.path.join(transform_dir, ".lock")
+        lock = Lock(lock_path, lifetime=timedelta(hours=1))
+        with lock:
+            if os.path.exists(input_transform_path):
+                input_transform = load_transform(input_transform_path)
+            else:
+                input_transform = _build_transform(
+                    variables,
+                    active_dataset_name,
+                    model_src_dataset_name,
+                    input_transform_key,
+                    build_input_transform,
                 )
-            target_transform = _create_transform(
-                target_variables,
-                active_dataset_name,
-                model_src_dataset_name,
-                target_transform_key,
-                build_target_transform,
-                target_transform_path,
-            )
+                save_transform(input_transform, input_transform_path)
+
+            if os.path.exists(target_transform_path):
+                target_transform = load_transform(target_transform_path)
+            else:
+                if evaluation:
+                    raise RuntimeError(
+                        "Target transform should only be fitted during training"
+                    )
+                target_transform = _build_transform(
+                    target_variables,
+                    active_dataset_name,
+                    model_src_dataset_name,
+                    target_transform_key,
+                    build_target_transform,
+                )
+                save_transform(target_transform, target_transform_path)
 
     return input_transform, target_transform
