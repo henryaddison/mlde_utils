@@ -59,7 +59,6 @@ def get_dataloader(
         input_transform_key,
         target_transform_key,
         transform_dir,
-        batch_size,
         split,
         evaluation,
     )

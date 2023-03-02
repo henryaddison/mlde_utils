@@ -19,7 +19,6 @@ def get_dataset(
     input_transform_key,
     target_transform_key,
     transform_dir,
-    batch_size,
     split,
     evaluation=False,
 ):
