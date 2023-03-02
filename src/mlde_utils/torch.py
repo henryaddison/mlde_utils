@@ -47,8 +47,8 @@ def get_dataloader(
       input_transform_key: Name of input transform pipeline to use
       target_transform_key: Name of target transform pipeline to use
       batch_size: Size of batch to use for DataLoaders
-      evaluation: If `True`, fix number of epochs to 1.
       split: Split of the active dataset to load
+      evaluation: If `True`, fix number of epochs to 1.
 
     Returns:
       data_loader, transform, target_transform.
