@@ -126,7 +126,9 @@ def _find_or_create_transforms(
 
         dataset_transform_dir = os.path.join(transform_dir, active_dataset_name)
         os.makedirs(dataset_transform_dir, exist_ok=True)
-        input_transform_path = os.path.join(dataset_transform_dir, "input.pickle")
+        input_transform_path = os.path.join(
+            dataset_transform_dir, input_transform_key, "input.pickle"
+        )
         target_transform_path = os.path.join(transform_dir, "target.pickle")
 
         lock_path = os.path.join(transform_dir, ".lock")
