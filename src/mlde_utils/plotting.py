@@ -103,28 +103,18 @@ def freq_density_plot(ax, ds, target_pr, grouping_key="model", diagnostics=False
 
 def qq_plot(
     ax,
-    target_pr,
-    ds,
-    quantiles,
+    target_quantiles,
+    sample_quantiles,
+    grouping_key="model",
     title="Sample vs Target quantiles",
     xlabel="Target precip (mm day-1)",
     ylabel="Sample precip (mm day-1)",
-    grouping_key="model",
     **scatter_args,
 ):
-    labels = ds[grouping_key].values
-    pred_prs = [ds["pred_pr"].sel({grouping_key: value}) for value in labels]
-    x_quantiles = target_pr.quantile(quantiles)
-    ideal_tr = max(
-        target_pr.max().values, *[y.max().values for y in pred_prs]
-    )  # max(target_quantiles.max().values+10, pred_quantiles.max().values+10)
+    ideal_tr = max(target_quantiles.max().values, sample_quantiles.max().values)
     ideal_tr = ideal_tr + 0.1 * abs(ideal_tr)
-    ideal_bl = (
-        x_quantiles.min().values
-    )  # max(target_quantiles.max().values+10, pred_quantiles.max().values+10)
-    ideal_bl = ideal_bl - 0.1 * abs(
-        ideal_bl
-    )  # max(target_quantiles.max().values+10, pred_quantiles.max().values+10)
+    ideal_bl = min(target_quantiles.min().values, sample_quantiles.min().values)
+    ideal_bl = ideal_bl - 0.1 * abs(ideal_bl)
     ax.plot(
         [ideal_bl, ideal_tr],
         [ideal_bl, ideal_tr],
@@ -133,11 +123,11 @@ def qq_plot(
         label="Ideal",
         alpha=0.5,
     )
-    for (label, y) in zip(labels, pred_prs):
-        y_quantiles = y.quantile(quantiles)
+
+    for label, group_quantiles in sample_quantiles.groupby(grouping_key):
         ax.scatter(
-            x_quantiles,
-            y_quantiles,
+            target_quantiles,
+            group_quantiles,
             **(dict(label=label, alpha=0.75, marker="x") | scatter_args),
         )
 
