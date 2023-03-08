@@ -20,7 +20,7 @@ from ..plotting import (
 
 
 def open_samples_ds(
-    run_name, human_name, checkpoint_id, dataset_name, split, num_samples
+    run_name, human_name, checkpoint_id, dataset_name, input_xfm_key, split, num_samples
 ):
     samples_filepath_pattern = os.path.join(
         os.getenv("DERIVED_DATA"),
@@ -28,6 +28,7 @@ def open_samples_ds(
         run_name,
         f"samples/{checkpoint_id}",
         dataset_name,
+        input_xfm_key,
         split,
         "predictions-*.nc",
     )
@@ -56,10 +57,11 @@ def merge_over_runs(runs, dataset_name, split, samples_per_run):
                 human_name,
                 checkpoint_id,
                 dataset_name,
+                input_xfm_key,
                 split,
                 num_samples=samples_per_run,
             ).isel(sample_id=range(samples_per_run))
-            for run_name, checkpoint_id, human_name in runs
+            for run_name, checkpoint_id, input_xfm_key, human_name in runs
         ]
     )
     eval_ds = xr.open_dataset(
