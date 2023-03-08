@@ -109,15 +109,12 @@ def qq_plot(
     title="Sample vs Target quantiles",
     xlabel="Target precip (mm day-1)",
     ylabel="Sample precip (mm day-1)",
+    tr=200,
     **scatter_args,
 ):
-    ideal_tr = max(target_quantiles.max().values, sample_quantiles.max().values)
-    ideal_tr = ideal_tr + 0.1 * abs(ideal_tr)
-    ideal_bl = min(target_quantiles.min().values, sample_quantiles.min().values)
-    ideal_bl = ideal_bl - 0.1 * abs(ideal_bl)
     ax.plot(
-        [ideal_bl, ideal_tr],
-        [ideal_bl, ideal_tr],
+        [0, tr],
+        [0, tr],
         color="black",
         linestyle="--",
         label="Ideal",
