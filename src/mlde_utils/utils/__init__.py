@@ -166,15 +166,14 @@ def distribution_figure(
 
     ax = axes["Quantiles"]
 
-    target_quantiles = target_pr.quantile(
-        quantiles, dim=["time", "grid_latitude", "grid_longitude"]
+    dims = set(target_pr.dims) & set(["time", "grid_latitude", "grid_longitude"])
+    target_quantiles = target_pr.quantile(quantiles, dim=dims)
+
+    dims = set(ds["pred_pr"].dims) & set(
+        ["time", "grid_latitude", "grid_longitude", "sample_id"]
     )
-    sample_quantiles = ds.quantile(
-        quantiles, dim=["time", "grid_latitude", "grid_longitude", "sample_id"]
-    )
-    qq_plot(
-        ax, target_quantiles, sample_quantiles, quantiles, grouping_key=grouping_key
-    )
+    sample_quantiles = ds["pred_pr"].quantile(quantiles, dim=dims)
+    qq_plot(ax, target_quantiles, sample_quantiles, grouping_key=grouping_key)
     plt.show()
 
 
@@ -188,12 +187,14 @@ def seasonal_distribution_figure(ds, target_pr, quantiles, grouping_key="model")
         ax = axes[f"Quantiles {season}"]
         seasonal_target_pr = target_pr.sel(time=(target_pr["time.season"] == season))
 
-        seasonal_target_quantiles = seasonal_target_pr.quantile(
-            quantiles, dim=["time", "grid_latitude", "grid_longitude"]
+        dims = set(seasonal_target_pr.dims) & set(
+            ["time", "grid_latitude", "grid_longitude"]
         )
-        seasonal_sample_quantiles = seasonal_ds.quantile(
-            quantiles, dim=["time", "grid_latitude", "grid_longitude", "sample_id"]
+        seasonal_target_quantiles = seasonal_target_pr.quantile(quantiles, dim=dims)
+        dims = set(seasonal_ds["pred_pr"].dims) & set(
+            ["time", "grid_latitude", "grid_longitude", "sample_id"]
         )
+        seasonal_sample_quantiles = seasonal_ds["pred_pr"].quantile(quantiles, dim=dims)
 
         qq_plot(
             ax,
