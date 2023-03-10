@@ -110,11 +110,12 @@ def qq_plot(
     xlabel="Target precip (mm day-1)",
     ylabel="Sample precip (mm day-1)",
     tr=200,
+    bl=0,
     **scatter_args,
 ):
     ax.plot(
-        [0, tr],
-        [0, tr],
+        [bl, tr],
+        [bl, tr],
         color="black",
         linestyle="--",
         label="Ideal",
