@@ -331,6 +331,9 @@ def build_input_transform(variables, key="v1"):
     if key == "v1":
         return ComposeT([Standardize(variables), UnitRangeT(variables)])
 
+    if key == "none":
+        return NoopT()
+
     if key in ["standardize", "stan"]:
         return ComposeT([Standardize(variables)])
 
@@ -381,6 +384,9 @@ def build_target_transform(target_variables, key="v1"):
                 UnitRangeT(target_variables),
             ]
         )
+
+    if key == "none":
+        return NoopT()
 
     if key == "sqrt":
         return ComposeT(
