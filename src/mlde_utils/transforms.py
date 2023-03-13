@@ -457,4 +457,14 @@ def build_target_transform(target_variables, key="v1"):
             ]
         )
 
+    if key == "logurrecen":
+        return ComposeT(
+            [
+                ClipT(target_variables),
+                LogT(target_variables),
+                UnitRangeT(target_variables),
+                RecentreT(target_variables),
+            ]
+        )
+
     raise RuntimeError(f"Unknown input transform {key}")
