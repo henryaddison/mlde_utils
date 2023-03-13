@@ -155,54 +155,56 @@ def show_samples(ds, timestamps):
 
 
 def distribution_figure(
-    ds, target_pr, quantiles, figtitle, grouping_key="model", diagnostics=False
+    ds,
+    target_pr,
+    quantiles,
+    quantile_dims,
+    grouping_key="model",
+    density_kwargs=dict(),
+    qq_kwargs=dict(),
 ):
     fig, axes = plt.subplot_mosaic(
         [["Density", "Quantiles"]], figsize=(16.5, 5.5), constrained_layout=True
     )
 
     ax = axes["Density"]
-    freq_density_plot(
-        ax, ds, target_pr, diagnostics=diagnostics, grouping_key=grouping_key
-    )
+    freq_density_plot(ax, ds, target_pr, grouping_key=grouping_key, **density_kwargs)
 
     ax = axes["Quantiles"]
 
-    dims = set(target_pr.dims) & set(["time", "grid_latitude", "grid_longitude"])
-    target_quantiles = target_pr.quantile(quantiles, dim=dims)
+    cpm_quantiles = target_pr.quantile(quantiles, dim=quantile_dims)
 
-    dims = set(ds["pred_pr"].dims) & set(
-        ["time", "grid_latitude", "grid_longitude", "sample_id"]
+    sample_quantiles = ds["pred_pr"].quantile(
+        quantiles, dim=quantile_dims + ["sample_id"]
     )
-    sample_quantiles = ds["pred_pr"].quantile(quantiles, dim=dims)
-    qq_plot(ax, target_quantiles, sample_quantiles, grouping_key=grouping_key)
+    qq_plot(ax, cpm_quantiles, sample_quantiles, grouping_key=grouping_key, **qq_kwargs)
     plt.show()
 
 
-def seasonal_distribution_figure(ds, target_pr, quantiles, grouping_key="model"):
+def seasonal_distribution_figure(
+    samples_ds, cpm_pr_da, quantiles, quantile_dims, grouping_key="model"
+):
     fig, axes = plt.subplot_mosaic(
         [["Quantiles DJF", "Quantiles MAM", "Quantiles JJA", "Quantiles SON"]],
         figsize=(22, 5.5),
         constrained_layout=True,
     )
-    for season, seasonal_ds in ds.groupby("time.season"):
+    for season, seasonal_samples_ds in samples_ds.groupby("time.season"):
         ax = axes[f"Quantiles {season}"]
-        seasonal_target_pr = target_pr.sel(time=(target_pr["time.season"] == season))
+        seasonal_cpm_pr_da = cpm_pr_da.sel(time=(cpm_pr_da["time.season"] == season))
 
-        dims = set(seasonal_target_pr.dims) & set(
-            ["time", "grid_latitude", "grid_longitude"]
+        seasonal_cpm_quantiles = seasonal_cpm_pr_da.quantile(
+            quantiles, dim=quantile_dims
         )
-        seasonal_target_quantiles = seasonal_target_pr.quantile(quantiles, dim=dims)
-        dims = set(seasonal_ds["pred_pr"].dims) & set(
-            ["time", "grid_latitude", "grid_longitude", "sample_id"]
+        seasonal_sample_quantiles = seasonal_samples_ds["pred_pr"].quantile(
+            quantiles, dim=quantile_dims + ["sample_id"]
         )
-        seasonal_sample_quantiles = seasonal_ds["pred_pr"].quantile(quantiles, dim=dims)
 
         qq_plot(
             ax,
-            seasonal_target_quantiles,
+            seasonal_cpm_quantiles,
             seasonal_sample_quantiles,
-            title=f"Sample vs Target {season} quantiles",
+            title=f"Sample vs CPM {season} quantiles",
             grouping_key=grouping_key,
         )
     plt.show()

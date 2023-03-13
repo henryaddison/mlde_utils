@@ -59,7 +59,7 @@ def freq_density_plot(ax, ds, target_pr, grouping_key="model", diagnostics=False
         density=True,
         color="black",
         alpha=0.2,
-        label="Target",
+        label="CPM",
         log=True,
         range=hrange,
     )
@@ -77,7 +77,7 @@ def freq_density_plot(ax, ds, target_pr, grouping_key="model", diagnostics=False
             linestyle="-",
         )
 
-    ax.set_title("Log density of sample and target precip")
+    ax.set_title("Log density of samples and CPM precip")
     ax.set_xlabel("Precip (mm day-1)")
     ax.tick_params(axis="both", which="major")
     if diagnostics:
@@ -106,21 +106,25 @@ def qq_plot(
     target_quantiles,
     sample_quantiles,
     grouping_key="model",
-    title="Sample vs Target quantiles",
-    xlabel="Target precip (mm day-1)",
+    title="Sample vs CPM quantiles",
+    xlabel="CPM precip (mm day-1)",
     ylabel="Sample precip (mm day-1)",
     tr=200,
     bl=0,
+    guide_label="Ideal",
     **scatter_args,
 ):
+    # if guide_label is not None:
     ax.plot(
         [bl, tr],
         [bl, tr],
         color="black",
         linestyle="--",
-        label="Ideal",
-        alpha=0.5,
+        label=guide_label,
+        alpha=0.2,
     )
+
+    # ax.set_xlim(bl, tr)
 
     for label, group_quantiles in sample_quantiles.groupby(grouping_key):
         ax.scatter(
