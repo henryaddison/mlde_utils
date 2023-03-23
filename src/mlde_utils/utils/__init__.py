@@ -174,9 +174,7 @@ def distribution_figure(
 
     cpm_quantiles = target_pr.quantile(quantiles, dim=quantile_dims)
 
-    sample_quantiles = ds["pred_pr"].quantile(
-        quantiles, dim=quantile_dims + ["sample_id"]
-    )
+    sample_quantiles = ds["pred_pr"].quantile(quantiles, dim=quantile_dims)
     qq_plot(ax, cpm_quantiles, sample_quantiles, grouping_key=grouping_key, **qq_kwargs)
     plt.show()
 
@@ -197,7 +195,7 @@ def seasonal_distribution_figure(
             quantiles, dim=quantile_dims
         )
         seasonal_sample_quantiles = seasonal_samples_ds["pred_pr"].quantile(
-            quantiles, dim=quantile_dims + ["sample_id"]
+            quantiles, dim=quantile_dims
         )
 
         qq_plot(
