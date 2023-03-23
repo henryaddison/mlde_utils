@@ -2,6 +2,7 @@ import cartopy.crs as ccrs
 import matplotlib
 import matplotlib.pyplot as plt
 import metpy.plots.ctables
+import seaborn as sns
 
 cp_model_rotated_pole = ccrs.RotatedPole(pole_longitude=177.5, pole_latitude=37.5)
 platecarree = ccrs.PlateCarree()
@@ -129,9 +130,19 @@ def qq_plot(
     for label, group_quantiles in sample_quantiles.groupby(grouping_key):
         ax.scatter(
             target_quantiles,
-            group_quantiles,
+            group_quantiles.mean(dim="sample_id"),
             **(dict(label=label, alpha=0.75, marker="x") | scatter_args),
         )
+        data = (
+            group_quantiles.squeeze()
+            .to_pandas()
+            .reset_index()
+            .melt(
+                id_vars="quantile", value_vars=list(group_quantiles["sample_id"].values)
+            )
+            .merge(target_quantiles.to_pandas().rename("cpm_quantile").reset_index())
+        )
+        sns.lineplot(data=data, x="cpm_quantile", y="value", errorbar="sd", ax=ax)
 
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
