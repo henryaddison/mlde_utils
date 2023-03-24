@@ -8,8 +8,9 @@ import pandas as pd
 import scipy
 import xarray as xr
 
+from .. import cp_model_rotated_pole
+
 from ..plotting import (
-    cp_model_rotated_pole,
     freq_density_plot,
     precip_clevs,
     precip_norm,

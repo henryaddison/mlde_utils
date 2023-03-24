@@ -1,11 +1,9 @@
-import cartopy.crs as ccrs
 import matplotlib
 import matplotlib.pyplot as plt
 import metpy.plots.ctables
 import seaborn as sns
 
-cp_model_rotated_pole = ccrs.RotatedPole(pole_longitude=177.5, pole_latitude=37.5)
-platecarree = ccrs.PlateCarree()
+from . import cp_model_rotated_pole
 
 # precip_clevs = [0, 1, 2.5, 5, 7.5, 10, 15, 20, 30, 40,
 #      50, 70, 100, 150, 200, 250, 300, 400, 500, 600, 750, 1000]
