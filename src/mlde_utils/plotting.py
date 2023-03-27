@@ -126,11 +126,11 @@ def qq_plot(
     # ax.set_xlim(bl, tr)
 
     for label, group_quantiles in sample_quantiles.groupby(grouping_key):
-        ax.scatter(
-            target_quantiles,
-            group_quantiles.mean(dim="sample_id"),
-            **(dict(label=label, alpha=0.75, marker="x") | scatter_args),
-        )
+        # ax.scatter(
+        #     target_quantiles,
+        #     group_quantiles.mean(dim="sample_id"),
+        #     **(dict(label=label, alpha=0.75, marker="x") | scatter_args),
+        # )
         data = (
             group_quantiles.squeeze()
             .to_pandas()
@@ -141,7 +141,16 @@ def qq_plot(
             )
             .merge(target_quantiles.to_pandas().rename("cpm_quantile").reset_index())
         )
-        sns.lineplot(data=data, x="cpm_quantile", y="value", errorbar="sd", ax=ax)
+        sns.lineplot(
+            data=data,
+            x="cpm_quantile",
+            y="value",
+            errorbar="sd",
+            marker="X",
+            label=label,
+            ax=ax,
+            alpha=0.75,
+        )
 
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
