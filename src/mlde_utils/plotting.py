@@ -134,6 +134,7 @@ def qq_plot(
         data = (
             group_quantiles.squeeze()
             .to_pandas()
+            .dropna()  # bit of a hack while have some models just for GCM and others just for CPM
             .reset_index()
             .melt(
                 id_vars="quantile", value_vars=list(group_quantiles["sample_id"].values)
