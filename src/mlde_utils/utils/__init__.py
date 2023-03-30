@@ -21,7 +21,14 @@ from ..plotting import (
 
 
 def open_samples_ds(
-    run_name, human_name, checkpoint_id, dataset_name, input_xfm_key, split, num_samples
+    run_name,
+    human_name,
+    checkpoint_id,
+    dataset_name,
+    input_xfm_key,
+    split,
+    num_samples,
+    deterministic,
 ):
     samples_filepath_pattern = os.path.join(
         os.getenv("DERIVED_DATA"),
@@ -39,14 +46,20 @@ def open_samples_ds(
     ]
     if len(sample_ds_list) == 0:
         raise RuntimeError(f"{samples_filepath_pattern} has no sample files")
-    if len(sample_ds_list) < num_samples:
-        raise RuntimeError(
-            f"{samples_filepath_pattern} does not have {num_samples} sample files"
-        )
-    # concatenate the samples along a new dimension
-    ds = xr.concat(sample_ds_list, dim="sample_id")
+    if not deterministic:
+        if len(sample_ds_list) < num_samples:
+            raise RuntimeError(
+                f"{samples_filepath_pattern} does not have {num_samples} sample files"
+            )
+
+        ds = xr.concat(sample_ds_list, dim="sample_id")
+        ds = ds.isel(sample_id=range(num_samples))
+    else:
+        ds = sample_ds_list[0]
+
     # add a model dimension so can compare data from different ml models
     ds = ds.expand_dims(model=[human_name])
+
     return ds
 
 
@@ -61,8 +74,9 @@ def merge_over_runs(runs, dataset_name, split, samples_per_run):
                 input_xfm_key,
                 split,
                 num_samples=samples_per_run,
-            ).isel(sample_id=range(samples_per_run))
-            for run_name, checkpoint_id, input_xfm_key, human_name in runs
+                deterministic=deterministic,
+            )
+            for run_name, checkpoint_id, input_xfm_key, human_name, deterministic in runs
         ]
     )
     eval_ds = xr.open_dataset(
@@ -90,8 +104,9 @@ def merge_over_sources(datasets, runs, split, samples_per_run):
     return xr.concat(xr_datasets, pd.Index(sources, name="source"))
 
 
-def prep_eval_data(datasets, runs, split, samples_per_run=3):
-    ds = merge_over_sources(datasets, runs, split, samples_per_run=samples_per_run)
+def prep_eval_data(dataset, runs, split, samples_per_run=3):
+    ds = merge_over_runs(runs, dataset, split, samples_per_run=samples_per_run)
+    # ds = merge_over_sources(dataset, runs, split, samples_per_run=samples_per_run)
 
     # convert from kg m-2 s-1 (i.e. mm s-1) to mm day-1
     ds["pred_pr"] = (ds["pred_pr"] * 3600 * 24).assign_attrs({"units": "mm day-1"})
