@@ -145,7 +145,6 @@ def qq_plot(
             data=data,
             x="cpm_quantile",
             y="value",
-            errorbar="sd",
             marker="X",
             label=label,
             ax=ax,
