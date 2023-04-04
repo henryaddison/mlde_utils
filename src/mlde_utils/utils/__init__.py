@@ -205,7 +205,7 @@ def distribution_figure(
             title=model,
             grouping_key="sample_id",
             alpha=0.5,
-            legend=False,
+            show_legend=False,
         )
     plt.show()
 

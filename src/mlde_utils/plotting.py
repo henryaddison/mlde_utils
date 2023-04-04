@@ -111,7 +111,7 @@ def qq_plot(
     tr=200,
     bl=0,
     guide_label="Ideal",
-    legend=True,
+    show_legend=True,
     **lineplot_args,
 ):
     # if guide_label is not None:
@@ -167,6 +167,7 @@ def qq_plot(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
-    if legend:
-        ax.legend()
+    legend = ax.legend()
+    if not show_legend:
+        legend.remove()
     ax.set_aspect(aspect=1)
