@@ -111,7 +111,7 @@ def qq_plot(
     tr=200,
     bl=0,
     guide_label="Ideal",
-    **scatter_args,
+    **lineplot_args,
 ):
     # if guide_label is not None:
     ax.plot(
@@ -124,7 +124,6 @@ def qq_plot(
     )
 
     # ax.set_xlim(bl, tr)
-
     for label, group_quantiles in sample_quantiles.groupby(grouping_key):
         # ax.scatter(
         #     target_quantiles,
@@ -136,20 +135,32 @@ def qq_plot(
             .to_pandas()
             .dropna()  # bit of a hack while have some models just for GCM and others just for CPM
             .reset_index()
-            .melt(
+        )
+        if grouping_key != "sample_id":
+            data = data.melt(
                 id_vars="quantile", value_vars=list(group_quantiles["sample_id"].values)
             )
-            .merge(target_quantiles.to_pandas().rename("cpm_quantile").reset_index())
+        else:
+            data = data.melt(id_vars="quantile", value_vars=[0])
+        data = data.merge(
+            target_quantiles.to_pandas().rename("cpm_quantile").reset_index()
+        )
+
+        kwargs = (
+            dict(
+                errorbar=None,
+                marker="X",
+                alpha=0.75,
+            )
+            | lineplot_args
         )
         sns.lineplot(
             data=data,
             x="cpm_quantile",
             y="value",
-            errorbar=None,
-            marker="X",
-            label=label,
             ax=ax,
-            alpha=0.75,
+            label=label,
+            **kwargs,
         )
 
     ax.set_xlabel(xlabel)

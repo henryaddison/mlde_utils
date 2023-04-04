@@ -194,6 +194,20 @@ def distribution_figure(
     qq_plot(ax, cpm_quantiles, sample_quantiles, grouping_key=grouping_key, **qq_kwargs)
     plt.show()
 
+    fig, axes = plt.subplot_mosaic(
+        [ds["model"].values], figsize=(16.5, 5.5), constrained_layout=True
+    )
+    for model, model_quantiles in sample_quantiles.groupby("model"):
+        qq_plot(
+            axes[model],
+            cpm_quantiles,
+            model_quantiles,
+            title=model,
+            grouping_key="sample_id",
+            alpha=0.5,
+        )
+    plt.show()
+
 
 def seasonal_distribution_figure(
     samples_ds, cpm_pr_da, quantiles, quantile_dims, grouping_key="model"
