@@ -23,9 +23,9 @@ STYLES = {
 
 def create_map_fig(grid_spec, width=None, height=None):
     if width is None:
-        width = len(grid_spec[0]) * 5.5
+        width = len(grid_spec[0]) * 3.5
     if height is None:
-        height = len(grid_spec) * 5.5
+        height = len(grid_spec) * 3.5
     subplot_kw = dict(projection=cp_model_rotated_pole)
     return plt.subplot_mosaic(
         grid_spec,
@@ -106,8 +106,8 @@ def qq_plot(
     sample_quantiles,
     grouping_key="model",
     title="Sample vs CPM quantiles",
-    xlabel="CPM precip (mm day-1)",
-    ylabel="Sample precip (mm day-1)",
+    xlabel="CPM precip (mm/day)",
+    ylabel="Sample precip (mm/day)",
     tr=200,
     bl=0,
     guide_label="Ideal",

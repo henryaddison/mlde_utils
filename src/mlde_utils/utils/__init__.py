@@ -180,7 +180,7 @@ def distribution_figure(
     qq_kwargs=dict(),
 ):
     fig, axes = plt.subplot_mosaic(
-        [["Density"]], figsize=(11, 5.5), constrained_layout=True
+        [["Density"]], figsize=(7, 3.5), constrained_layout=True
     )
 
     ax = axes["Density"]
@@ -188,7 +188,7 @@ def distribution_figure(
     plt.show()
 
     fig, axes = plt.subplot_mosaic(
-        [["Quantiles"]], figsize=(5.5, 5.5), constrained_layout=True
+        [["Quantiles"]], figsize=(3.5, 3.5), constrained_layout=True
     )
 
     ax = axes["Quantiles"]
@@ -196,11 +196,17 @@ def distribution_figure(
     cpm_quantiles = target_pr.quantile(quantiles, dim=quantile_dims)
 
     sample_quantiles = ds["pred_pr"].quantile(quantiles, dim=quantile_dims)
-    qq_plot(ax, cpm_quantiles, sample_quantiles, grouping_key=grouping_key, **qq_kwargs)
+    qq_plot(
+        ax,
+        cpm_quantiles,
+        sample_quantiles,
+        grouping_key=grouping_key,
+        **({"title": None} | qq_kwargs),
+    )
     plt.show()
 
     fig, axes = plt.subplot_mosaic(
-        [ds["model"].values], figsize=(16.5, 5.5), constrained_layout=True
+        [ds["model"].values], figsize=(10.5, 3.5), constrained_layout=True
     )
     for model, model_quantiles in sample_quantiles.groupby("model"):
         qq_plot(
