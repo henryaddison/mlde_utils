@@ -331,10 +331,10 @@ def plot_mean_bias(ds, target_pr):
         pcm = plot_grid(
             bias_ratio.sel(model=model),
             ax,
-            title=f"{model} normalized mean bias",
+            title=f"{model}",
             norm=None,
             cmap="BrBG",
-            vmax=0.2,
+            vmax=0.4,
             center=0,
             add_colorbar=False,
         )
