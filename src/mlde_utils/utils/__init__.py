@@ -180,11 +180,16 @@ def distribution_figure(
     qq_kwargs=dict(),
 ):
     fig, axes = plt.subplot_mosaic(
-        [["Density", "Quantiles"]], figsize=(16.5, 5.5), constrained_layout=True
+        [["Density"]], figsize=(11, 5.5), constrained_layout=True
     )
 
     ax = axes["Density"]
     freq_density_plot(ax, ds, target_pr, grouping_key=grouping_key, **density_kwargs)
+    plt.show()
+
+    fig, axes = plt.subplot_mosaic(
+        [["Quantiles"]], figsize=(5.5, 5.5), constrained_layout=True
+    )
 
     ax = axes["Quantiles"]
 
