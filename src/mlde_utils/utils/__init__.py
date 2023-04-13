@@ -238,7 +238,7 @@ def seasonal_distribution_figure(
 ):
     fig, axes = plt.subplot_mosaic(
         [["Quantiles DJF", "Quantiles MAM", "Quantiles JJA", "Quantiles SON"]],
-        figsize=(22, 5.5),
+        figsize=(14, 3.5),
         constrained_layout=True,
     )
     for season, seasonal_samples_ds in samples_ds.groupby("time.season"):
@@ -267,7 +267,7 @@ def scatter_plots(ds, target_pr):
 
     pred_pr = ds["pred_pr"]
     fig, axd = plt.subplot_mosaic(
-        [pred_pr["model"].values], figsize=(22, 5.5), constrained_layout=True
+        [pred_pr["model"].values], figsize=(14, 3.5), constrained_layout=True
     )
     for model in pred_pr["model"].values:
         tr = max(ds["pred_pr"].max(), ds["target_pr"].max())
@@ -324,7 +324,7 @@ def plot_mean_bias(ds, target_pr):
     grid_spec = compute_gridspec(bias_ratio["model"].values, target_name)
     fig, axd = plt.subplot_mosaic(
         grid_spec,
-        figsize=(grid_spec.shape[1] * 5.5, grid_spec.shape[0] * 5.5),
+        figsize=(grid_spec.shape[1] * 3.5, grid_spec.shape[0] * 3.5),
         subplot_kw=dict(projection=cp_model_rotated_pole),
         constrained_layout=True,
     )
@@ -366,7 +366,7 @@ def plot_std_bias(ds, target_pr):
     grid_spec = compute_gridspec(std_ratio["model"].values, target_name)
     fig, axd = plt.subplot_mosaic(
         grid_spec,
-        figsize=(grid_spec.shape[1] * 5.5, grid_spec.shape[0] * 5.5),
+        figsize=(grid_spec.shape[1] * 3.5, grid_spec.shape[0] * 3.5),
         subplot_kw=dict(projection=cp_model_rotated_pole),
         constrained_layout=True,
     )
