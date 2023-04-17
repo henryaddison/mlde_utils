@@ -14,8 +14,8 @@ class VariableMetadata:
         frequency,
         domain,
         resolution,
+        ensemble_member,
         scenario="rcp85",
-        ensemble_member="01",
     ):
         self.base_dir = base_dir
         self.variable = variable
