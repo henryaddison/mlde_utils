@@ -1,3 +1,4 @@
+from pathlib import Path
 import cartopy.crs as ccrs
 import glob
 import os
@@ -73,3 +74,25 @@ class VariableMetadata:
             os.path.basename(filepath) for filepath in self.existing_filepaths()
         ]
         return list([int(filename[-20:-16]) for filename in filenames])
+
+
+def workdir(fq_run_id: str) -> Path:
+    return Path(os.getenv("DERIVED_DATA"), fq_run_id)
+
+
+def samples_path(
+    workdir: str, checkpoint: str, input_xfm: str, dataset: str, split: str
+) -> Path:
+    return Path(workdir, "samples", checkpoint, dataset, input_xfm, split)
+
+
+def samples_glob(samples_path: Path) -> Path:
+    return glob.glob(samples_path / "predictions-*.nc")
+
+
+def dataset_path(dataset: str) -> Path:
+    return Path(os.getenv("DERIVED_DATA"), "moose", "nc-datasets", dataset)
+
+
+def dataset_split_path(dataset: str, split: str) -> Path:
+    return dataset_path(dataset) / f"{split}.nc"
