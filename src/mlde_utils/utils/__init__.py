@@ -58,38 +58,51 @@ def open_samples_ds(
         ds = sample_ds_list[0]
 
     # add a model dimension so can compare data from different ml models
-    ds = ds.expand_dims(model=[human_name])
+    # ds = ds.update({"pred_pr": ds["pred_pr"].expand_dims(model=[human_name])})
 
     return ds
 
 
-def merge_over_runs(runs, dataset_name, split, samples_per_run):
-    samples_ds = xr.merge(
-        [
-            open_samples_ds(
-                run_name,
-                human_name,
-                checkpoint_id,
-                dataset_name,
-                input_xfm_key,
-                split,
-                num_samples=samples_per_run,
-                deterministic=deterministic,
-            )
-            for run_name, checkpoint_id, input_xfm_key, human_name, deterministic in runs
-        ]
-    )
-    eval_ds = xr.open_dataset(
-        os.path.join(
-            os.getenv("DERIVED_DATA"),
-            "moose",
-            "nc-datasets",
-            dataset_name,
-            f"{split}.nc",
-        )
+def merge_over_runs(sample_runs, split, samples_per_run):
+    samples_das = [
+        open_samples_ds(
+            run_name=sample_run["fq_model_id"],
+            human_name=sample_run["label"],
+            checkpoint_id=sample_run["checkpoint"],
+            dataset_name=sample_run["dataset"],
+            input_xfm_key=sample_run["input_xfm"],
+            split=split,
+            num_samples=samples_per_run,
+            deterministic=sample_run["deterministic"],
+        )["pred_pr"]
+        for sample_run in sample_runs
+    ]
+
+    samples_ds = xr.concat(
+        samples_das, pd.Index([sr["label"] for sr in sample_runs], name="model")
     )
 
-    return xr.merge([samples_ds, eval_ds], join="inner")
+    # return samples_ds
+    eval_ds = xr.merge(
+        [
+            xr.open_dataset(
+                os.path.join(
+                    os.getenv("DERIVED_DATA"),
+                    "moose",
+                    "nc-datasets",
+                    dataset_name,
+                    f"{split}.nc",
+                )
+            )
+            for dataset_name in set(
+                [sample_run["dataset"] for sample_run in sample_runs]
+            )
+        ],
+        compat="override",
+    )
+
+    # return eval_ds
+    return xr.merge([samples_ds, eval_ds], join="inner", compat="override")
 
 
 def merge_over_sources(datasets, runs, split, samples_per_run):
@@ -104,9 +117,8 @@ def merge_over_sources(datasets, runs, split, samples_per_run):
     return xr.concat(xr_datasets, pd.Index(sources, name="source"))
 
 
-def prep_eval_data(dataset, runs, split, samples_per_run=3):
-    ds = merge_over_runs(runs, dataset, split, samples_per_run=samples_per_run)
-    # ds = merge_over_sources(dataset, runs, split, samples_per_run=samples_per_run)
+def prep_eval_data(sample_runs, split, samples_per_run=3):
+    ds = merge_over_runs(sample_runs, split, samples_per_run=samples_per_run)
 
     # convert from kg m-2 s-1 (i.e. mm s-1) to mm day-1
     ds["pred_pr"] = (ds["pred_pr"] * 3600 * 24).assign_attrs({"units": "mm day-1"})
@@ -226,7 +238,7 @@ def seasonal_distribution_figure(
 ):
     fig, axes = plt.subplot_mosaic(
         [["Quantiles DJF", "Quantiles MAM", "Quantiles JJA", "Quantiles SON"]],
-        figsize=(22, 5.5),
+        figsize=(14, 3.5),
         constrained_layout=True,
     )
     for season, seasonal_samples_ds in samples_ds.groupby("time.season"):
@@ -255,7 +267,7 @@ def scatter_plots(ds, target_pr):
 
     pred_pr = ds["pred_pr"]
     fig, axd = plt.subplot_mosaic(
-        [pred_pr["model"].values], figsize=(22, 5.5), constrained_layout=True
+        [pred_pr["model"].values], figsize=(14, 3.5), constrained_layout=True
     )
     for model in pred_pr["model"].values:
         tr = max(ds["pred_pr"].max(), ds["target_pr"].max())
@@ -312,7 +324,7 @@ def plot_mean_bias(ds, target_pr):
     grid_spec = compute_gridspec(bias_ratio["model"].values, target_name)
     fig, axd = plt.subplot_mosaic(
         grid_spec,
-        figsize=(grid_spec.shape[1] * 5.5, grid_spec.shape[0] * 5.5),
+        figsize=(grid_spec.shape[1] * 3.5, grid_spec.shape[0] * 3.5),
         subplot_kw=dict(projection=cp_model_rotated_pole),
         constrained_layout=True,
     )
@@ -354,7 +366,7 @@ def plot_std_bias(ds, target_pr):
     grid_spec = compute_gridspec(std_ratio["model"].values, target_name)
     fig, axd = plt.subplot_mosaic(
         grid_spec,
-        figsize=(grid_spec.shape[1] * 5.5, grid_spec.shape[0] * 5.5),
+        figsize=(grid_spec.shape[1] * 3.5, grid_spec.shape[0] * 3.5),
         subplot_kw=dict(projection=cp_model_rotated_pole),
         constrained_layout=True,
     )
