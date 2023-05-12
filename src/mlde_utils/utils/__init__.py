@@ -20,9 +20,13 @@ from ..plotting import (
 )
 
 
+def si_to_mmday(ds, varname):
+    # convert from kg m-2 s-1 (i.e. mm s-1) to mm day-1
+    return (ds[varname] * 3600 * 24).assign_attrs({"units": "mm day-1"})
+
+
 def open_samples_ds(
     run_name,
-    human_name,
     checkpoint_id,
     dataset_name,
     input_xfm_key,
@@ -57,17 +61,42 @@ def open_samples_ds(
     else:
         ds = sample_ds_list[0]
 
-    # add a model dimension so can compare data from different ml models
-    # ds = ds.update({"pred_pr": ds["pred_pr"].expand_dims(model=[human_name])})
+    ds["pred_pr"] = si_to_mmday(ds, "pred_pr")
 
     return ds
 
 
-def merge_over_runs(sample_runs, split, samples_per_run):
+def open_split_ds(dataset_name, split):
+    ds = xr.open_dataset(
+        os.path.join(
+            os.getenv("DERIVED_DATA"),
+            "moose",
+            "nc-datasets",
+            dataset_name,
+            f"{split}.nc",
+        )
+    )
+    ds["target_pr"] = si_to_mmday(ds, "target_pr")
+
+    return ds
+
+
+def open_merged_split_datasets(sample_runs, split):
+    return xr.merge(
+        [
+            open_split_ds(dataset_name, split)
+            for dataset_name in set(
+                [sample_run["dataset"] for sample_run in sample_runs]
+            )
+        ],
+        compat="override",
+    )
+
+
+def open_concat_sample_datasets(sample_runs, split, samples_per_run):
     samples_das = [
         open_samples_ds(
             run_name=sample_run["fq_model_id"],
-            human_name=sample_run["label"],
             checkpoint_id=sample_run["checkpoint"],
             dataset_name=sample_run["dataset"],
             input_xfm_key=sample_run["input_xfm"],
@@ -82,49 +111,15 @@ def merge_over_runs(sample_runs, split, samples_per_run):
         samples_das, pd.Index([sr["label"] for sr in sample_runs], name="model")
     )
 
-    # return samples_ds
-    eval_ds = xr.merge(
-        [
-            xr.open_dataset(
-                os.path.join(
-                    os.getenv("DERIVED_DATA"),
-                    "moose",
-                    "nc-datasets",
-                    dataset_name,
-                    f"{split}.nc",
-                )
-            )
-            for dataset_name in set(
-                [sample_run["dataset"] for sample_run in sample_runs]
-            )
-        ],
-        compat="override",
-    )
-
-    # return eval_ds
-    return xr.merge([samples_ds, eval_ds], join="inner", compat="override")
-
-
-def merge_over_sources(datasets, runs, split, samples_per_run):
-    xr_datasets = []
-    sources = []
-    for source, dataset_name in datasets.items():
-        xr_datasets.append(
-            merge_over_runs(runs, dataset_name, split, samples_per_run=samples_per_run)
-        )
-        sources.append(source)
-
-    return xr.concat(xr_datasets, pd.Index(sources, name="source"))
+    return samples_ds
 
 
 def prep_eval_data(sample_runs, split, samples_per_run=3):
-    ds = merge_over_runs(sample_runs, split, samples_per_run=samples_per_run)
+    samples_ds = open_concat_sample_datasets(sample_runs, split, samples_per_run)
 
-    # convert from kg m-2 s-1 (i.e. mm s-1) to mm day-1
-    ds["pred_pr"] = (ds["pred_pr"] * 3600 * 24).assign_attrs({"units": "mm day-1"})
-    ds["target_pr"] = (ds["target_pr"] * 3600 * 24).assign_attrs({"units": "mm day-1"})
+    eval_ds = open_merged_split_datasets(sample_runs, split)
 
-    return ds
+    return xr.merge([samples_ds, eval_ds], join="inner", compat="override")
 
 
 def show_samples(ds, timestamps):
