@@ -69,7 +69,7 @@ def freq_density_plot(ax, ds, target_pr, grouping_key="model", diagnostics=False
             density=True,
             alpha=0.75,
             histtype="step",
-            label=f"{grouping_key} {group_value}",
+            label=f"{group_value}",
             log=True,
             range=hrange,
             linewidth=2,
