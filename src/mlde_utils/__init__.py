@@ -76,8 +76,8 @@ class VariableMetadata:
         return list([int(filename[-20:-16]) for filename in filenames])
 
 
-def workdir(fq_run_id: str) -> Path:
-    return Path(os.getenv("DERIVED_DATA"), fq_run_id)
+def workdir_path(fq_run_id: str) -> Path:
+    return Path(os.getenv("DERIVED_DATA"), "workdirs", fq_run_id)
 
 
 def samples_path(
@@ -87,7 +87,7 @@ def samples_path(
 
 
 def samples_glob(samples_path: Path) -> Path:
-    return glob.glob(samples_path / "predictions-*.nc")
+    return glob.glob(str(samples_path / "predictions-*.nc"))
 
 
 def dataset_path(dataset: str) -> Path:
