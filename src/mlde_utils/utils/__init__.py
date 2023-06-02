@@ -5,6 +5,7 @@ from .. import dataset_split_path, workdir_path, samples_path, samples_glob
 
 
 def si_to_mmday(ds, varname):
+    print("hello")
     # convert from kg m-2 s-1 (i.e. mm s-1) to mm day-1
     return (ds[varname] * 3600 * 24).assign_attrs({"units": "mm day-1"})
 
