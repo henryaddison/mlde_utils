@@ -12,6 +12,8 @@ from ..transforms import (
     load_transform,
 )
 
+from .. import dataset_split_path, dataset_path
+
 
 def get_dataset(
     active_dataset_name,
@@ -55,17 +57,11 @@ def get_dataset(
 
 
 def load_raw_dataset_split(dataset_name, split):
-    data_dirpath = os.path.join(
-        os.getenv("DERIVED_DATA"), "moose", "nc-datasets", dataset_name
-    )
-    return xr.load_dataset(os.path.join(data_dirpath, f"{split}.nc"))
+    return xr.load_dataset(dataset_split_path(dataset_name, split))
 
 
 def get_variables(dataset_name):
-    data_dirpath = os.path.join(
-        os.getenv("DERIVED_DATA"), "moose", "nc-datasets", dataset_name
-    )
-    with open(os.path.join(data_dirpath, "ds-config.yml"), "r") as f:
+    with open(os.path.join(dataset_path(dataset_name), "ds-config.yml"), "r") as f:
         ds_config = yaml.safe_load(f)
 
     variables = [pred_meta["variable"] for pred_meta in ds_config["predictors"]]
