@@ -86,20 +86,20 @@ class PixelMatchModelSrcStandardize:
 
     def fit(self, target_ds, model_src_ds):
         self.pixel_target_means = {
-            variable: target_ds[variable].mean(dim=["time"])
+            variable: target_ds[variable].mean(dim=["time", "ensemble_member"])
             for variable in self.variables
         }
         self.pixel_target_stds = {
-            variable: target_ds[variable].std(dim=["time"])
+            variable: target_ds[variable].std(dim=["time", "ensemble_member"])
             for variable in self.variables
         }
 
         self.pixel_model_src_means = {
-            variable: model_src_ds[variable].mean(dim=["time"])
+            variable: model_src_ds[variable].mean(dim=["time", "ensemble_member"])
             for variable in self.variables
         }
         self.pixel_model_src_stds = {
-            variable: model_src_ds[variable].std(dim=["time"])
+            variable: model_src_ds[variable].std(dim=["time", "ensemble_member"])
             for variable in self.variables
         }
 
