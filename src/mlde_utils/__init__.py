@@ -1,6 +1,7 @@
 import glob
 import os
 from pathlib import Path
+from typing import List
 import yaml
 
 import cartopy.crs as ccrs
@@ -76,6 +77,33 @@ class VariableMetadata:
             os.path.basename(filepath) for filepath in self.existing_filepaths()
         ]
         return list([int(filename[-20:-16]) for filename in filenames])
+
+
+class DatasetMetadata:
+    def __init__(self, name):
+        self.name = name
+
+    def path(self):
+        return Path(os.getenv("DERIVED_DATA"), "moose", "nc-datasets", self.name)
+
+    def splits(self):
+        return map(
+            lambda f: os.path.splitext(f)[0],
+            glob.glob("*.nc", root_dir=str(self.path())),
+        )
+
+    def split_path(self, split):
+        return self.path() / f"{split}.nc"
+
+    def config_path(self) -> Path:
+        return self.path() / "ds-config.yml"
+
+    def config(self) -> dict:
+        with open(self.config_path(), "r") as f:
+            return yaml.safe_load(f)
+
+    def ensemble_members(self) -> List[str]:
+        return self.config()["ensemble_members"]
 
 
 def workdir_path(fq_run_id: str) -> Path:
