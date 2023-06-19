@@ -1,7 +1,9 @@
-from pathlib import Path
-import cartopy.crs as ccrs
 import glob
 import os
+from pathlib import Path
+import yaml
+
+import cartopy.crs as ccrs
 
 cp_model_rotated_pole = ccrs.RotatedPole(pole_longitude=177.5, pole_latitude=37.5)
 platecarree = ccrs.PlateCarree()
@@ -96,3 +98,12 @@ def dataset_path(dataset: str) -> Path:
 
 def dataset_split_path(dataset: str, split: str) -> Path:
     return dataset_path(dataset) / f"{split}.nc"
+
+
+def dataset_config_path(dataset: str) -> Path:
+    return dataset_path(dataset) / "ds-config.yml"
+
+
+def dataset_config(dataset: str) -> dict:
+    with open(dataset_config_path(dataset), "r") as f:
+        return yaml.safe_load(f)

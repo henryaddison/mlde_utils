@@ -1,7 +1,6 @@
 from datetime import timedelta
 import logging
 import os
-import yaml
 
 import xarray as xr
 
@@ -12,7 +11,7 @@ from ..transforms import (
     load_transform,
 )
 
-from .. import dataset_split_path, dataset_path
+from .. import dataset_split_path, dataset_config
 
 
 def get_dataset(
@@ -61,8 +60,7 @@ def load_raw_dataset_split(dataset_name, split):
 
 
 def get_variables(dataset_name):
-    with open(os.path.join(dataset_path(dataset_name), "ds-config.yml"), "r") as f:
-        ds_config = yaml.safe_load(f)
+    ds_config = dataset_config(dataset_name)
 
     variables = [pred_meta["variable"] for pred_meta in ds_config["predictors"]]
     target_variables = ["target_pr"]
