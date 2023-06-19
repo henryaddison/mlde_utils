@@ -25,24 +25,22 @@ def open_samples_ds(
         dataset=dataset_name,
         split=split,
     )
-    samples_filepath_glob = samples_glob(samples_dir)
-
-    sample_ds_list = [
-        xr.open_dataset(sample_filepath)
-        for sample_filepath in samples_filepath_glob[:num_samples]
-    ]
-    if len(sample_ds_list) == 0:
+    sample_files_list = samples_glob(samples_dir)
+    if len(sample_files_list) == 0:
         raise RuntimeError(f"{samples_dir} has no sample files")
-    if not deterministic:
-        if len(sample_ds_list) < num_samples:
+
+    if deterministic:
+        ds = xr.open_dataset(sample_files_list[0])
+    else:
+        sample_files_list = sample_files_list[:num_samples]
+        if len(sample_files_list) < num_samples:
             raise RuntimeError(
                 f"{samples_dir} does not have {num_samples} sample files"
             )
-
-        ds = xr.concat(sample_ds_list, dim="sample_id")
-        ds = ds.isel(sample_id=range(num_samples))
-    else:
-        ds = sample_ds_list[0]
+        ds = xr.concat(
+            [xr.open_dataset(sample_filepath) for sample_filepath in sample_files_list],
+            dim="sample_id",
+        ).isel(sample_id=range(num_samples))
 
     ds["pred_pr"] = si_to_mmday(ds, "pred_pr")
 
