@@ -21,6 +21,7 @@ def get_dataset(
     target_transform_key,
     transform_dir,
     split,
+    ensemble_members,
     evaluation=False,
 ):
     """Create data loaders for given split.
@@ -32,6 +33,7 @@ def get_dataset(
       input_transform_key: Name of input transform pipeline to use
       target_transform_key: Name of target transform pipeline to use
       split: Split of the active dataset to load
+      ensemble_members: Ensemble members of dataset to load
       evaluation: If `True`, fix number of epochs to 1.
 
     Returns:
@@ -47,7 +49,9 @@ def get_dataset(
         evaluation,
     )
 
-    xr_data = load_raw_dataset_split(active_dataset_name, split)
+    xr_data = load_raw_dataset_split(active_dataset_name, split).sel(
+        ensemble_member=ensemble_members
+    )
 
     xr_data = transform.transform(xr_data)
     xr_data = target_transform.transform(xr_data)
