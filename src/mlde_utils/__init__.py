@@ -83,9 +83,16 @@ def workdir_path(fq_run_id: str) -> Path:
 
 
 def samples_path(
-    workdir: str, checkpoint: str, input_xfm: str, dataset: str, split: str
+    workdir: str,
+    checkpoint: str,
+    input_xfm: str,
+    dataset: str,
+    split: str,
+    ensemble_member: str,
 ) -> Path:
-    return Path(workdir, "samples", checkpoint, dataset, input_xfm, split)
+    return Path(
+        workdir, "samples", checkpoint, dataset, input_xfm, split, ensemble_member
+    )
 
 
 def samples_glob(samples_path: Path) -> Path:
