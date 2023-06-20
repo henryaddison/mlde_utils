@@ -79,7 +79,9 @@ def open_merged_split_datasets(sample_runs, split, ensemble_members):
     )
 
 
-def open_concat_sample_datasets(sample_runs, split, ensemble_members, samples_per_run):
+def open_concat_sample_dataarrays(
+    sample_runs, split, ensemble_members, samples_per_run
+):
     samples_das = [
         open_samples_ds(
             run_name=sample_run["fq_model_id"],
@@ -94,20 +96,21 @@ def open_concat_sample_datasets(sample_runs, split, ensemble_members, samples_pe
         for sample_run in sample_runs
     ]
 
-    samples_ds = xr.concat(
+    samples_da = xr.concat(
         samples_das, pd.Index([sr["label"] for sr in sample_runs], name="model")
     )
 
-    return samples_ds
+    if "sample_id" not in samples_da.dims:
+        samples_da = samples_da["pred_pr"].expand_dims("sample_id")
+
+    return samples_da
 
 
 def prep_eval_data(sample_runs, split, ensemble_members, samples_per_run=3):
-    samples_ds = open_concat_sample_datasets(
+    samples_da = open_concat_sample_dataarrays(
         sample_runs, split, ensemble_members, samples_per_run
     )
-    if "sample_id" not in samples_ds["pred_pr"].dims:
-        samples_ds["pred_pr"] = samples_ds["pred_pr"].expand_dims("sample_id")
 
     eval_ds = open_merged_split_datasets(sample_runs, split, ensemble_members)
 
-    return xr.merge([samples_ds, eval_ds], join="inner", compat="override")
+    return xr.merge([samples_da, eval_ds], join="inner", compat="override")
