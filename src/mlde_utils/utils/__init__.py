@@ -82,7 +82,7 @@ def open_merged_split_datasets(sample_runs, split, ensemble_members):
 def open_concat_sample_dataarrays(
     sample_runs, split, ensemble_members, samples_per_run
 ):
-    samples_das = [
+    sample_das = [
         open_samples_ds(
             run_name=sample_run["fq_model_id"],
             checkpoint_id=sample_run["checkpoint"],
@@ -97,11 +97,11 @@ def open_concat_sample_dataarrays(
     ]
 
     samples_da = xr.concat(
-        samples_das, pd.Index([sr["label"] for sr in sample_runs], name="model")
+        sample_das, pd.Index([sr["label"] for sr in sample_runs], name="model")
     )
 
     if "sample_id" not in samples_da.dims:
-        samples_da = samples_da["pred_pr"].expand_dims("sample_id")
+        samples_da = samples_da.expand_dims("sample_id")
 
     return samples_da
 
