@@ -105,6 +105,8 @@ def prep_eval_data(sample_runs, split, ensemble_members, samples_per_run=3):
     samples_ds = open_concat_sample_datasets(
         sample_runs, split, ensemble_members, samples_per_run
     )
+    if "sample_id" not in samples_ds["pred_pr"]:
+        samples_ds["pred_pr"] = samples_ds["pred_pr"].expand_dims("sample_id")
 
     eval_ds = open_merged_split_datasets(sample_runs, split, ensemble_members)
 
