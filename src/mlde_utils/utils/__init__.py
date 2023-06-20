@@ -60,7 +60,7 @@ def open_samples_ds(
 
 def open_split_ds(dataset_name, split, ensemble_members):
     ds = xr.open_dataset(dataset_split_path(dataset_name, split)).sel(
-        ensemble_members=ensemble_members
+        ensemble_member=ensemble_members
     )
     ds["target_pr"] = si_to_mmday(ds, "target_pr")
 
