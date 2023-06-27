@@ -59,6 +59,10 @@ def get_dataset(
     return xr_data, transform, target_transform
 
 
+def open_raw_dataset_split(dataset_name, split):
+    return xr.open_dataset(dataset_split_path(dataset_name, split))
+
+
 def load_raw_dataset_split(dataset_name, split):
     return xr.load_dataset(dataset_split_path(dataset_name, split))
 
@@ -80,13 +84,16 @@ def _build_transform(
     builder,
 ):
     logging.info(f"Fitting transform")
-    model_src_training_split = load_raw_dataset_split(model_src_dataset_name, "train")
-
-    active_dataset_training_split = load_raw_dataset_split(active_dataset_name, "train")
 
     xfm = builder(variables, key=transform_key)
 
+    model_src_training_split = open_raw_dataset_split(model_src_dataset_name, "train")
+    active_dataset_training_split = open_raw_dataset_split(active_dataset_name, "train")
+
     xfm.fit(active_dataset_training_split, model_src_training_split)
+
+    model_src_training_split.close()
+    active_dataset_training_split.close()
 
     return xfm
 
