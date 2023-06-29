@@ -1,4 +1,5 @@
 from datetime import timedelta
+import gc
 import logging
 import os
 
@@ -93,7 +94,10 @@ def _build_transform(
     xfm.fit(active_dataset_training_split, model_src_training_split)
 
     model_src_training_split.close()
+    del model_src_training_split
     active_dataset_training_split.close()
+    del active_dataset_training_split
+    gc.collect
 
     return xfm
 
@@ -167,4 +171,5 @@ def _find_or_create_transforms(
                 )
                 save_transform(target_transform, target_transform_path)
 
+    gc.collect
     return input_transform, target_transform
