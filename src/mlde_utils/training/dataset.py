@@ -1,7 +1,7 @@
 from datetime import timedelta
+import gc
 import logging
 import os
-import yaml
 
 import xarray as xr
 
@@ -12,7 +12,7 @@ from ..transforms import (
     load_transform,
 )
 
-from .. import dataset_split_path, dataset_path
+from .. import dataset_split_path, dataset_config
 
 
 def get_dataset(
@@ -22,6 +22,7 @@ def get_dataset(
     target_transform_key,
     transform_dir,
     split,
+    ensemble_members,
     evaluation=False,
 ):
     """Create data loaders for given split.
@@ -33,6 +34,7 @@ def get_dataset(
       input_transform_key: Name of input transform pipeline to use
       target_transform_key: Name of target transform pipeline to use
       split: Split of the active dataset to load
+      ensemble_members: Ensemble members of dataset to load
       evaluation: If `True`, fix number of epochs to 1.
 
     Returns:
@@ -48,7 +50,9 @@ def get_dataset(
         evaluation,
     )
 
-    xr_data = load_raw_dataset_split(active_dataset_name, split)
+    xr_data = load_raw_dataset_split(active_dataset_name, split).sel(
+        ensemble_member=ensemble_members
+    )
 
     xr_data = transform.transform(xr_data)
     xr_data = target_transform.transform(xr_data)
@@ -56,13 +60,16 @@ def get_dataset(
     return xr_data, transform, target_transform
 
 
+def open_raw_dataset_split(dataset_name, split):
+    return xr.open_dataset(dataset_split_path(dataset_name, split))
+
+
 def load_raw_dataset_split(dataset_name, split):
     return xr.load_dataset(dataset_split_path(dataset_name, split))
 
 
 def get_variables(dataset_name):
-    with open(os.path.join(dataset_path(dataset_name), "ds-config.yml"), "r") as f:
-        ds_config = yaml.safe_load(f)
+    ds_config = dataset_config(dataset_name)
 
     variables = [pred_meta["variable"] for pred_meta in ds_config["predictors"]]
     target_variables = ["target_pr"]
@@ -78,13 +85,19 @@ def _build_transform(
     builder,
 ):
     logging.info(f"Fitting transform")
-    model_src_training_split = load_raw_dataset_split(model_src_dataset_name, "train")
-
-    active_dataset_training_split = load_raw_dataset_split(active_dataset_name, "train")
 
     xfm = builder(variables, key=transform_key)
 
+    model_src_training_split = open_raw_dataset_split(model_src_dataset_name, "train")
+    active_dataset_training_split = open_raw_dataset_split(active_dataset_name, "train")
+
     xfm.fit(active_dataset_training_split, model_src_training_split)
+
+    model_src_training_split.close()
+    del model_src_training_split
+    active_dataset_training_split.close()
+    del active_dataset_training_split
+    gc.collect
 
     return xfm
 
@@ -158,4 +171,5 @@ def _find_or_create_transforms(
                 )
                 save_transform(target_transform, target_transform_path)
 
+    gc.collect
     return input_transform, target_transform
