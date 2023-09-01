@@ -5,11 +5,27 @@ from typing import List
 import yaml
 
 import cartopy.crs as ccrs
+import cftime
 
 cp_model_rotated_pole = ccrs.RotatedPole(pole_longitude=177.5, pole_latitude=37.5)
 platecarree = ccrs.PlateCarree()
 
 DEFAULT_ENSEMBLE_MEMBER = "01"
+
+TIME_PERIODS = {
+    "historic": (
+        cftime.Datetime360Day(1980, 12, 1, 12, 0, 0, 0, has_year_zero=True),
+        cftime.Datetime360Day(2000, 11, 30, 12, 0, 0, 0, has_year_zero=True),
+    ),
+    "present": (
+        cftime.Datetime360Day(2020, 12, 1, 12, 0, 0, 0, has_year_zero=True),
+        cftime.Datetime360Day(2040, 11, 30, 12, 0, 0, 0, has_year_zero=True),
+    ),
+    "future": (
+        cftime.Datetime360Day(2060, 12, 1, 12, 0, 0, 0, has_year_zero=True),
+        cftime.Datetime360Day(2080, 11, 30, 12, 0, 0, 0, has_year_zero=True),
+    ),
+}
 
 
 class VariableMetadata:
