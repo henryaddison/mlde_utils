@@ -141,8 +141,8 @@ def samples_path(
     )
 
 
-def samples_glob(samples_path: Path) -> Path:
-    return glob.glob(str(samples_path / "predictions-*.nc"))
+def samples_glob(samples_path: Path) -> list[Path]:
+    return samples_path.glob("predictions-*.nc")
 
 
 def dataset_path(dataset: str) -> Path:
