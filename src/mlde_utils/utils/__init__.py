@@ -30,7 +30,7 @@ def open_samples_ds(
             split=split,
             ensemble_member=ensemble_member,
         )
-        sample_files_list = samples_glob(samples_dir)
+        sample_files_list = list(samples_glob(samples_dir))
         if len(sample_files_list) == 0:
             raise RuntimeError(f"{samples_dir} has no sample files")
 
