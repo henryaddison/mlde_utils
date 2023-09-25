@@ -1,7 +1,13 @@
 import pandas as pd
 import xarray as xr
 
-from .. import dataset_split_path, workdir_path, samples_path, samples_glob
+from .. import (
+    TIME_PERIODS,
+    dataset_split_path,
+    workdir_path,
+    samples_path,
+    samples_glob,
+)
 
 
 def si_to_mmday(ds, varname):
@@ -113,4 +119,33 @@ def prep_eval_data(sample_runs, split, ensemble_members, samples_per_run=3):
 
     eval_ds = open_merged_split_datasets(sample_runs, split, ensemble_members)
 
-    return xr.merge([samples_da, eval_ds], join="inner", compat="override")
+    ds = xr.merge([samples_da, eval_ds], join="inner", compat="override")
+
+    def tp_from_time(x):
+        for tp_key, (tp_start, tp_end) in TIME_PERIODS.items():
+            if (x >= tp_start) and (x <= tp_end):
+                return tp_key
+        raise RuntimeError(f"No time period for {x}")
+
+    time_period_coord_values = xr.apply_ufunc(
+        tp_from_time, ds["time"], input_core_dims=None, vectorize=True
+    )
+    ds = ds.assign_coords(time_period=("time", time_period_coord_values.data))
+
+    dec_adjusted_year = ds["time.year"] + (ds["time.month"] == 12)
+    ds = ds.assign_coords(dec_adjusted_year=("time", dec_adjusted_year.data))
+
+    ds = ds.assign_coords(
+        stratum=("time", ds["time_period"].str.cat(ds["time.season"], sep=" ").data)
+    )
+
+    ds = ds.assign_coords(
+        tp_season_year=(
+            "time",
+            ds["time_period"]
+            .str.cat(ds["time.season"], ds["dec_adjusted_year"], sep=" ")
+            .data,
+        )
+    )
+
+    return ds
