@@ -18,6 +18,7 @@ from .. import dataset_split_path, dataset_config
 def get_dataset(
     active_dataset_name,
     model_src_dataset_name,
+    input_transform_dataset_name,
     input_transform_key,
     target_transform_key,
     transform_dir,
@@ -30,9 +31,10 @@ def get_dataset(
     Args:
       active_dataset_name: Name of dataset from which to load data splits
       model_src_dataset_name: Name of dataset used to train the diffusion model (may be the same)
-      transform_dir: Path to where transforms should be stored
+      input_transform_dataset_name: Name of dataset to use for fitting input transform (may be the same as active_dataset_name or model_src_dataset_name)
       input_transform_key: Name of input transform pipeline to use
       target_transform_key: Name of target transform pipeline to use
+      transform_dir: Path to where transforms should be stored
       split: Split of the active dataset to load
       ensemble_members: Ensemble members of dataset to load
       evaluation: If `True`, fix number of epochs to 1.
@@ -42,7 +44,7 @@ def get_dataset(
     """
 
     transform, target_transform = _find_or_create_transforms(
-        active_dataset_name,
+        input_transform_dataset_name,
         model_src_dataset_name,
         transform_dir,
         input_transform_key,
