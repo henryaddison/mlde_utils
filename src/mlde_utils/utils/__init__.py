@@ -12,7 +12,14 @@ from .. import (
 
 def si_to_mmday(ds, varname):
     # convert from kg m-2 s-1 (i.e. mm s-1) to mm day-1
-    return (ds[varname] * 3600 * 24).assign_attrs({"units": "mm day-1"})
+    return (ds[varname] * 3600 * 24).assign_attrs(
+        {
+            "units": "mm day-1",
+            "grid_mapping": ds[varname].attrs.get(
+                "grid_mapping", "rotated_latitude_longitude"
+            ),
+        }
+    )
 
 
 def open_samples_ds(
