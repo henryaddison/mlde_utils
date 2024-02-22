@@ -145,18 +145,20 @@ def samples_glob(samples_path: Path) -> list[Path]:
     return samples_path.glob("predictions-*.nc")
 
 
-def dataset_path(dataset: str) -> Path:
-    return Path(os.getenv("DERIVED_DATA"), "moose", "nc-datasets", dataset)
+def dataset_path(dataset: str, base_dir: str = None) -> Path:
+    if base_dir is None:
+        base_dir = os.getenv("DERIVED_DATA")
+    return Path(base_dir, "moose", "nc-datasets", dataset)
 
 
-def dataset_split_path(dataset: str, split: str) -> Path:
-    return dataset_path(dataset) / f"{split}.nc"
+def dataset_split_path(dataset: str, split: str, base_dir: str = None) -> Path:
+    return dataset_path(dataset, base_dir=base_dir) / f"{split}.nc"
 
 
-def dataset_config_path(dataset: str) -> Path:
-    return dataset_path(dataset) / "ds-config.yml"
+def dataset_config_path(dataset: str, base_dir: str = None) -> Path:
+    return dataset_path(dataset, base_dir=base_dir) / "ds-config.yml"
 
 
-def dataset_config(dataset: str) -> dict:
-    with open(dataset_config_path(dataset), "r") as f:
+def dataset_config(dataset: str, base_dir: str = None) -> dict:
+    with open(dataset_config_path(dataset, base_dir=base_dir), "r") as f:
         return yaml.safe_load(f)
