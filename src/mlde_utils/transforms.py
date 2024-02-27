@@ -3,16 +3,18 @@ import pickle
 
 import numpy as np
 
+logger = logging.getLogger()
+
 
 def save_transform(xfm, path):
     with open(path, "wb") as f:
-        logging.info(f"Storing transform: {path}")
+        logger.info(f"Storing transform: {path}")
         pickle.dump(xfm, f, pickle.HIGHEST_PROTOCOL)
 
 
 def load_transform(path):
     with open(path, "rb") as f:
-        logging.info(f"Using stored transform: {path}")
+        logger.info(f"Using stored transform: {path}")
         xfm = pickle.load(f)
 
     return xfm
@@ -190,7 +192,10 @@ class ClipT:
 
     def invert(self, ds):
         for var in self.variables:
-            ds[var] = ds[var].clip(min=0.0)
+            min = 0.0
+            nclipped = (ds[var] < min).sum().item()
+            logger.debug(f"Clipping {var} to {min}: {nclipped}")
+            ds[var] = ds[var].clip(min=min)
 
         return ds
 
