@@ -1,8 +1,7 @@
 name: mlde_utils
 channels:
-  - pyviz
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - _libgcc_mutex=0.1=conda_forge
   - _openmp_mutex=4.5=2_gnu
@@ -106,4 +105,4 @@ dependencies:
       - urllib3==1.26.14
       - webencodings==0.5.1
       - zipp==3.12.0
-prefix: /home/henry/mambaforge/envs/mlde_utils
+prefix: /home/henry/miniforge3/envs/mlde_utils
