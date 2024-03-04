@@ -52,6 +52,9 @@ class VariableMetadata:
         elif self.resolution.startswith("60km"):
             self.collection = "land-gcm"
 
+    def __str__(self):
+        return "VariableMetadata: " + str(self.__dict__)
+
     def filename_prefix(self):
         return "_".join(
             [
@@ -100,6 +103,9 @@ class VariableMetadata:
 class DatasetMetadata:
     def __init__(self, name):
         self.name = name
+
+    def __str__(self):
+        return f"DatasetMetadata({self.path()})"
 
     def path(self):
         return Path(os.getenv("DERIVED_DATA"), "moose", "nc-datasets", self.name)
