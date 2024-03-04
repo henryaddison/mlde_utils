@@ -74,7 +74,9 @@ def get_variables(dataset_name):
     ds_config = dataset_config(dataset_name)
 
     variables = ds_config["predictors"]["variables"]
-    target_variables = ds_config["predictands"]["variables"]
+    target_variables = map(
+        lambda v: f"target_{v}", ds_config["predictands"]["variables"]
+    )
 
     return variables, target_variables
 
