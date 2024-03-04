@@ -73,8 +73,8 @@ def load_raw_dataset_split(dataset_name, split):
 def get_variables(dataset_name):
     ds_config = dataset_config(dataset_name)
 
-    variables = [pred_meta["variable"] for pred_meta in ds_config["predictors"]]
-    target_variables = ["target_pr"]
+    variables = ds_config["predictors"]["variables"]
+    target_variables = ds_config["predictands"]["variables"]
 
     return variables, target_variables
 
