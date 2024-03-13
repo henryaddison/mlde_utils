@@ -26,7 +26,7 @@ def get_dataset(
     ensemble_members,
     evaluation=False,
 ):
-    """Create data loaders for given split.
+    """Get xarray.Dataset and transforms for a named dataset split.
 
     Args:
       active_dataset_name: Name of dataset from which to load data splits
@@ -36,11 +36,11 @@ def get_dataset(
       target_transform_key: Name of target transform pipeline to use
       transform_dir: Path to where transforms should be stored
       split: Split of the active dataset to load
-      ensemble_members: Ensemble members of dataset to load
-      evaluation: If `True`, fix number of epochs to 1.
+      ensemble_members: Ensemble members to load
+      evaluation: If `True`, don't allow fitting of target transform
 
     Returns:
-      data_loader, transform, target_transform.
+      dataset, transform, target_transform
     """
 
     transform, target_transform = _find_or_create_transforms(
