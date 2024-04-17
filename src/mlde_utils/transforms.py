@@ -472,4 +472,20 @@ def build_target_transform(target_variables, key="v1"):
             ]
         )
 
+    if key == "stanurrecen":
+        return ComposeT(
+            [
+                Standardize(target_variables),
+                UnitRangeT(target_variables),
+                RecentreT(target_variables),
+            ]
+        )
+
+    if key == "recen":
+        return ComposeT(
+            [
+                RecentreT(target_variables),
+            ]
+        )
+
     raise RuntimeError(f"Unknown input transform {key}")
