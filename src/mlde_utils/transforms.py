@@ -49,6 +49,12 @@ class Standardize:
 
         return ds
 
+    def invert(self, ds):
+        for var in self.variables:
+            ds[var] = (ds[var] * self.stds[var]) + self.means[var]
+
+        return ds
+
 
 class PixelStandardize:
     def __init__(self, variables):
