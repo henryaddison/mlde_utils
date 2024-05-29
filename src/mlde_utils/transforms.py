@@ -206,6 +206,26 @@ class ClipT:
         return ds
 
 
+class PercentToPropT:
+    def __init__(self, variables):
+        self.variables = variables
+
+    def fit(self, target_ds, _model_src_ds):
+        return self
+
+    def transform(self, ds):
+        for var in self.variables:
+            ds[var] = ds[var] / 100.0
+
+        return ds
+
+    def invert(self, ds):
+        for var in self.variables:
+            ds[var] = ds[var] * 100.0
+
+        return ds
+
+
 class RecentreT:
     def __init__(self, variables):
         self.variables = variables
@@ -483,6 +503,22 @@ def build_target_transform(target_variables, key="v1"):
             [
                 Standardize(target_variables),
                 UnitRangeT(target_variables),
+                RecentreT(target_variables),
+            ]
+        )
+
+    if key == "urrecen":
+        return ComposeT(
+            [
+                UnitRangeT(target_variables),
+                RecentreT(target_variables),
+            ]
+        )
+
+    if key == "pcrecen":
+        return ComposeT(
+            [
+                PercentToPropT(target_variables),
                 RecentreT(target_variables),
             ]
         )
