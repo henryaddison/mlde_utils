@@ -507,10 +507,27 @@ def build_target_transform(target_variables, key="v1"):
             ]
         )
 
+    if key == "stanmmrecen":
+        return ComposeT(
+            [
+                Standardize(target_variables),
+                MinMax(target_variables),
+                RecentreT(target_variables),
+            ]
+        )
+
     if key == "urrecen":
         return ComposeT(
             [
                 UnitRangeT(target_variables),
+                RecentreT(target_variables),
+            ]
+        )
+
+    if key == "mmrecen":
+        return ComposeT(
+            [
+                MinMax(target_variables),
                 RecentreT(target_variables),
             ]
         )
