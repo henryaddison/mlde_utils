@@ -11,8 +11,6 @@ jobs:
     steps:
     - name: Clone repo
       uses: actions/checkout@v2
-    - name: Clone mlde_utils repo
-      uses: actions/checkout@v2
     # - name: Set up Python 3.9
     #   uses: actions/setup-python@v2
     #   with:
