@@ -20,6 +20,32 @@ def load_transform(path):
     return xfm
 
 
+_XFMS = {}
+
+
+def register_transform(cls=None, *, name=None):
+    """A decorator for registering transform classes."""
+
+    def _register(cls):
+        if name is None:
+            local_name = cls.__name__
+        else:
+            local_name = name
+        if local_name in _XFMS:
+            raise ValueError(f"Already registered transform with name: {local_name}")
+        _XFMS[local_name] = cls
+        return cls
+
+    if cls is None:
+        return _register
+    else:
+        return _register(cls)
+
+
+def get_transform(name):
+    return _XFMS[name]
+
+
 class CropT:
     def __init__(self, size):
         self.size = size
@@ -33,6 +59,7 @@ class CropT:
         )
 
 
+@register_transform(name="stan")
 class Standardize:
     def __init__(self, variables):
         self.variables = variables
@@ -56,6 +83,7 @@ class Standardize:
         return ds
 
 
+@register_transform(name="pixelstan")
 class PixelStandardize:
     def __init__(self, variables):
         self.variables = variables
@@ -77,6 +105,7 @@ class PixelStandardize:
         return ds
 
 
+@register_transform(name="noop")
 class NoopT:
     def fit(self, target_ds, model_src_ds):
         return self
@@ -88,6 +117,7 @@ class NoopT:
         return ds
 
 
+@register_transform(name="pixelmmsstan")
 class PixelMatchModelSrcStandardize:
     def __init__(self, variables):
         self.variables = variables
@@ -138,6 +168,7 @@ class PixelMatchModelSrcStandardize:
         return ds
 
 
+@register_transform(name="mm")
 class MinMax:
     def __init__(self, variables):
         self.variables = variables
@@ -161,6 +192,7 @@ class MinMax:
         return ds
 
 
+@register_transform(name="ur")
 class UnitRangeT:
     """WARNING: This transform assumes all values are positive"""
 
@@ -185,6 +217,7 @@ class UnitRangeT:
         return ds
 
 
+@register_transform(name="clip")
 class ClipT:
     def __init__(self, variables):
         self.variables = variables
@@ -206,6 +239,7 @@ class ClipT:
         return ds
 
 
+@register_transform(name="pc")
 class PercentToPropT:
     def __init__(self, variables):
         self.variables = variables
@@ -226,6 +260,7 @@ class PercentToPropT:
         return ds
 
 
+@register_transform(name="recen")
 class RecentreT:
     def __init__(self, variables):
         self.variables = variables
@@ -246,6 +281,7 @@ class RecentreT:
         return ds
 
 
+@register_transform(name="sqrt")
 class SqrtT:
     def __init__(self, variables):
         self.variables = variables
@@ -266,6 +302,7 @@ class SqrtT:
         return ds
 
 
+@register_transform(name="root")
 class RootT:
     def __init__(self, variables, root_base):
         self.variables = variables
@@ -287,6 +324,7 @@ class RootT:
         return ds
 
 
+@register_transform(name="rm")
 class RawMomentT:
     def __init__(self, variables, root_base):
         self.variables = variables
@@ -315,6 +353,7 @@ class RawMomentT:
         return ds
 
 
+@register_transform(name="log")
 class LogT:
     def __init__(self, variables):
         self.variables = variables
@@ -335,6 +374,7 @@ class LogT:
         return ds
 
 
+@register_transform(name="compose")
 class ComposeT:
     def __init__(self, transforms):
         self.transforms = transforms
@@ -403,7 +443,9 @@ def build_input_transform(variables, key="v1"):
             ]
         )
 
-    raise RuntimeError(f"Unknown input transform {key}")
+    # otherwise assume the key is ; separated list of transform names
+    xfms = map(lambda name: get_transform(name)(variables), key.split(";"))
+    return ComposeT(list(xfms))
 
 
 def build_target_transform(target_variables, key="v1"):
@@ -547,4 +589,6 @@ def build_target_transform(target_variables, key="v1"):
             ]
         )
 
-    raise RuntimeError(f"Unknown input transform {key}")
+    # otherwise assume the key is ; separated list of transform names
+    xfms = map(lambda name: get_transform(name)(target_variables), key.split(";"))
+    return ComposeT(list(xfms))
