@@ -448,13 +448,19 @@ def build_input_transform(variables, key="v1"):
     return ComposeT(list(xfms))
 
 
-def build_target_transform(target_variables, key="v1"):
+def build_target_transform(target_variables, keys):
+    return ComposeT(
+        [_build_target_transform(tvar, keys[tvar]) for tvar in target_variables]
+    )
+
+
+def _build_target_transform(target_variable, key):
     if key == "v1":
         return ComposeT(
             [
-                SqrtT(target_variables),
-                ClipT(target_variables),
-                UnitRangeT(target_variables),
+                SqrtT([target_variable]),
+                ClipT([target_variable]),
+                UnitRangeT([target_variable]),
             ]
         )
 
@@ -464,131 +470,131 @@ def build_target_transform(target_variables, key="v1"):
     if key == "sqrt":
         return ComposeT(
             [
-                RootT(target_variables, 2),
-                ClipT(target_variables),
+                RootT([target_variable], 2),
+                ClipT([target_variable]),
             ]
         )
 
     if key == "sqrtur":
         return ComposeT(
             [
-                RootT(target_variables, 2),
-                ClipT(target_variables),
-                UnitRangeT(target_variables),
+                RootT([target_variable], 2),
+                ClipT([target_variable]),
+                UnitRangeT([target_variable]),
             ]
         )
 
     if key == "sqrturrecen":
         return ComposeT(
             [
-                RootT(target_variables, 2),
-                ClipT(target_variables),
-                UnitRangeT(target_variables),
-                RecentreT(target_variables),
+                RootT([target_variable], 2),
+                ClipT([target_variable]),
+                UnitRangeT([target_variable]),
+                RecentreT([target_variable]),
             ]
         )
 
     if key == "sqrtrm":
         return ComposeT(
             [
-                RootT(target_variables, 2),
-                RawMomentT(target_variables, 2),
-                ClipT(target_variables),
+                RootT([target_variable], 2),
+                RawMomentT([target_variable], 2),
+                ClipT([target_variable]),
             ]
         )
 
     if key == "cbrt":
         return ComposeT(
             [
-                RootT(target_variables, 3),
-                ClipT(target_variables),
+                RootT([target_variable], 3),
+                ClipT([target_variable]),
             ]
         )
 
     if key == "cbrtur":
         return ComposeT(
             [
-                RootT(target_variables, 3),
-                ClipT(target_variables),
-                UnitRangeT(target_variables),
+                RootT([target_variable], 3),
+                ClipT([target_variable]),
+                UnitRangeT([target_variable]),
             ]
         )
 
     if key == "qdrt":
         return ComposeT(
             [
-                RootT(target_variables, 4),
-                ClipT(target_variables),
+                RootT([target_variable], 4),
+                ClipT([target_variable]),
             ]
         )
 
     if key == "log":
         return ComposeT(
             [
-                LogT(target_variables),
-                ClipT(target_variables),
+                LogT([target_variable]),
+                ClipT([target_variable]),
             ]
         )
 
     if key == "logurrecen":
         return ComposeT(
             [
-                ClipT(target_variables),
-                LogT(target_variables),
-                UnitRangeT(target_variables),
-                RecentreT(target_variables),
+                ClipT([target_variable]),
+                LogT([target_variable]),
+                UnitRangeT([target_variable]),
+                RecentreT([target_variable]),
             ]
         )
 
     if key == "stanurrecen":
         return ComposeT(
             [
-                Standardize(target_variables),
-                UnitRangeT(target_variables),
-                RecentreT(target_variables),
+                Standardize([target_variable]),
+                UnitRangeT([target_variable]),
+                RecentreT([target_variable]),
             ]
         )
 
     if key == "stanmmrecen":
         return ComposeT(
             [
-                Standardize(target_variables),
-                MinMax(target_variables),
-                RecentreT(target_variables),
+                Standardize([target_variable]),
+                MinMax([target_variable]),
+                RecentreT([target_variable]),
             ]
         )
 
     if key == "urrecen":
         return ComposeT(
             [
-                UnitRangeT(target_variables),
-                RecentreT(target_variables),
+                UnitRangeT([target_variable]),
+                RecentreT([target_variable]),
             ]
         )
 
     if key == "mmrecen":
         return ComposeT(
             [
-                MinMax(target_variables),
-                RecentreT(target_variables),
+                MinMax([target_variable]),
+                RecentreT([target_variable]),
             ]
         )
 
     if key == "pcrecen":
         return ComposeT(
             [
-                PercentToPropT(target_variables),
-                RecentreT(target_variables),
+                PercentToPropT([target_variable]),
+                RecentreT([target_variable]),
             ]
         )
 
     if key == "recen":
         return ComposeT(
             [
-                RecentreT(target_variables),
+                RecentreT([target_variable]),
             ]
         )
 
     # otherwise assume the key is ; separated list of transform names
-    xfms = map(lambda name: get_transform(name)(target_variables), key.split(";"))
+    xfms = map(lambda name: get_transform(name)([target_variable]), key.split(";"))
     return ComposeT(list(xfms))
