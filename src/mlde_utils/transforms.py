@@ -20,6 +20,32 @@ def load_transform(path):
     return xfm
 
 
+_XFMS = {}
+
+
+def register_transform(cls=None, *, name=None):
+    """A decorator for registering transform classes."""
+
+    def _register(cls):
+        if name is None:
+            local_name = cls.__name__
+        else:
+            local_name = name
+        if local_name in _XFMS:
+            raise ValueError(f"Already registered transform with name: {local_name}")
+        _XFMS[local_name] = cls
+        return cls
+
+    if cls is None:
+        return _register
+    else:
+        return _register(cls)
+
+
+def get_transform(name):
+    return _XFMS[name]
+
+
 class CropT:
     def __init__(self, size):
         self.size = size
@@ -33,6 +59,7 @@ class CropT:
         )
 
 
+@register_transform(name="stan")
 class Standardize:
     def __init__(self, variables):
         self.variables = variables
@@ -49,7 +76,14 @@ class Standardize:
 
         return ds
 
+    def invert(self, ds):
+        for var in self.variables:
+            ds[var] = (ds[var] * self.stds[var]) + self.means[var]
 
+        return ds
+
+
+@register_transform(name="pixelstan")
 class PixelStandardize:
     def __init__(self, variables):
         self.variables = variables
@@ -71,6 +105,7 @@ class PixelStandardize:
         return ds
 
 
+@register_transform(name="noop")
 class NoopT:
     def fit(self, target_ds, model_src_ds):
         return self
@@ -82,6 +117,7 @@ class NoopT:
         return ds
 
 
+@register_transform(name="pixelmmsstan")
 class PixelMatchModelSrcStandardize:
     def __init__(self, variables):
         self.variables = variables
@@ -132,6 +168,7 @@ class PixelMatchModelSrcStandardize:
         return ds
 
 
+@register_transform(name="mm")
 class MinMax:
     def __init__(self, variables):
         self.variables = variables
@@ -155,6 +192,7 @@ class MinMax:
         return ds
 
 
+@register_transform(name="ur")
 class UnitRangeT:
     """WARNING: This transform assumes all values are positive"""
 
@@ -179,6 +217,7 @@ class UnitRangeT:
         return ds
 
 
+@register_transform(name="clip")
 class ClipT:
     def __init__(self, variables):
         self.variables = variables
@@ -200,6 +239,28 @@ class ClipT:
         return ds
 
 
+@register_transform(name="pc")
+class PercentToPropT:
+    def __init__(self, variables):
+        self.variables = variables
+
+    def fit(self, target_ds, _model_src_ds):
+        return self
+
+    def transform(self, ds):
+        for var in self.variables:
+            ds[var] = ds[var] / 100.0
+
+        return ds
+
+    def invert(self, ds):
+        for var in self.variables:
+            ds[var] = ds[var] * 100.0
+
+        return ds
+
+
+@register_transform(name="recen")
 class RecentreT:
     def __init__(self, variables):
         self.variables = variables
@@ -220,6 +281,7 @@ class RecentreT:
         return ds
 
 
+@register_transform(name="sqrt")
 class SqrtT:
     def __init__(self, variables):
         self.variables = variables
@@ -240,6 +302,7 @@ class SqrtT:
         return ds
 
 
+@register_transform(name="root")
 class RootT:
     def __init__(self, variables, root_base):
         self.variables = variables
@@ -261,6 +324,7 @@ class RootT:
         return ds
 
 
+@register_transform(name="rm")
 class RawMomentT:
     def __init__(self, variables, root_base):
         self.variables = variables
@@ -289,6 +353,7 @@ class RawMomentT:
         return ds
 
 
+@register_transform(name="log")
 class LogT:
     def __init__(self, variables):
         self.variables = variables
@@ -309,6 +374,7 @@ class LogT:
         return ds
 
 
+@register_transform(name="compose")
 class ComposeT:
     def __init__(self, transforms):
         self.transforms = transforms
@@ -377,16 +443,24 @@ def build_input_transform(variables, key="v1"):
             ]
         )
 
-    raise RuntimeError(f"Unknown input transform {key}")
+    # otherwise assume the key is ; separated list of transform names
+    xfms = map(lambda name: get_transform(name)(variables), key.split(";"))
+    return ComposeT(list(xfms))
 
 
-def build_target_transform(target_variables, key="v1"):
+def build_target_transform(target_variables, keys):
+    return ComposeT(
+        [_build_target_transform(tvar, keys[tvar]) for tvar in target_variables]
+    )
+
+
+def _build_target_transform(target_variable, key):
     if key == "v1":
         return ComposeT(
             [
-                SqrtT(target_variables),
-                ClipT(target_variables),
-                UnitRangeT(target_variables),
+                SqrtT([target_variable]),
+                ClipT([target_variable]),
+                UnitRangeT([target_variable]),
             ]
         )
 
@@ -396,80 +470,131 @@ def build_target_transform(target_variables, key="v1"):
     if key == "sqrt":
         return ComposeT(
             [
-                RootT(target_variables, 2),
-                ClipT(target_variables),
+                RootT([target_variable], 2),
+                ClipT([target_variable]),
             ]
         )
 
     if key == "sqrtur":
         return ComposeT(
             [
-                RootT(target_variables, 2),
-                ClipT(target_variables),
-                UnitRangeT(target_variables),
+                RootT([target_variable], 2),
+                ClipT([target_variable]),
+                UnitRangeT([target_variable]),
             ]
         )
 
     if key == "sqrturrecen":
         return ComposeT(
             [
-                RootT(target_variables, 2),
-                ClipT(target_variables),
-                UnitRangeT(target_variables),
-                RecentreT(target_variables),
+                RootT([target_variable], 2),
+                ClipT([target_variable]),
+                UnitRangeT([target_variable]),
+                RecentreT([target_variable]),
             ]
         )
 
     if key == "sqrtrm":
         return ComposeT(
             [
-                RootT(target_variables, 2),
-                RawMomentT(target_variables, 2),
-                ClipT(target_variables),
+                RootT([target_variable], 2),
+                RawMomentT([target_variable], 2),
+                ClipT([target_variable]),
             ]
         )
 
     if key == "cbrt":
         return ComposeT(
             [
-                RootT(target_variables, 3),
-                ClipT(target_variables),
+                RootT([target_variable], 3),
+                ClipT([target_variable]),
             ]
         )
 
     if key == "cbrtur":
         return ComposeT(
             [
-                RootT(target_variables, 3),
-                ClipT(target_variables),
-                UnitRangeT(target_variables),
+                RootT([target_variable], 3),
+                ClipT([target_variable]),
+                UnitRangeT([target_variable]),
             ]
         )
 
     if key == "qdrt":
         return ComposeT(
             [
-                RootT(target_variables, 4),
-                ClipT(target_variables),
+                RootT([target_variable], 4),
+                ClipT([target_variable]),
             ]
         )
 
     if key == "log":
         return ComposeT(
             [
-                LogT(target_variables),
-                ClipT(target_variables),
+                LogT([target_variable]),
+                ClipT([target_variable]),
             ]
         )
 
     if key == "logurrecen":
         return ComposeT(
             [
-                ClipT(target_variables),
-                LogT(target_variables),
-                UnitRangeT(target_variables),
-                RecentreT(target_variables),
+                ClipT([target_variable]),
+                LogT([target_variable]),
+                UnitRangeT([target_variable]),
+                RecentreT([target_variable]),
             ]
         )
 
-    raise RuntimeError(f"Unknown input transform {key}")
+    if key == "stanurrecen":
+        return ComposeT(
+            [
+                Standardize([target_variable]),
+                UnitRangeT([target_variable]),
+                RecentreT([target_variable]),
+            ]
+        )
+
+    if key == "stanmmrecen":
+        return ComposeT(
+            [
+                Standardize([target_variable]),
+                MinMax([target_variable]),
+                RecentreT([target_variable]),
+            ]
+        )
+
+    if key == "urrecen":
+        return ComposeT(
+            [
+                UnitRangeT([target_variable]),
+                RecentreT([target_variable]),
+            ]
+        )
+
+    if key == "mmrecen":
+        return ComposeT(
+            [
+                MinMax([target_variable]),
+                RecentreT([target_variable]),
+            ]
+        )
+
+    if key == "pcrecen":
+        return ComposeT(
+            [
+                PercentToPropT([target_variable]),
+                RecentreT([target_variable]),
+            ]
+        )
+
+    if key == "recen":
+        return ComposeT(
+            [
+                RecentreT([target_variable]),
+            ]
+        )
+
+    # otherwise assume the key is ; separated list of transform names
+    xfms = map(lambda name: get_transform(name)([target_variable]), key.split(";"))
+    return ComposeT(list(xfms))

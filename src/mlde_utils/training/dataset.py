@@ -20,7 +20,7 @@ def get_dataset(
     model_src_dataset_name,
     input_transform_dataset_name,
     input_transform_key,
-    target_transform_key,
+    target_transform_keys,
     transform_dir,
     split,
     ensemble_members,
@@ -33,7 +33,7 @@ def get_dataset(
       model_src_dataset_name: Name of dataset used to train the diffusion model (may be the same)
       input_transform_dataset_name: Name of dataset to use for fitting input transform (may be the same as active_dataset_name or model_src_dataset_name)
       input_transform_key: Name of input transform pipeline to use
-      target_transform_key: Name of target transform pipeline to use
+      target_transform_keys: Mapping from name of target variable to name of target transform pipeline to use
       transform_dir: Path to where transforms should be stored
       split: Split of the active dataset to load
       ensemble_members: Ensemble members to load
@@ -48,7 +48,7 @@ def get_dataset(
         model_src_dataset_name,
         transform_dir,
         input_transform_key,
-        target_transform_key,
+        target_transform_keys,
         evaluation,
     )
 
@@ -85,12 +85,12 @@ def _build_transform(
     variables,
     active_dataset_name,
     model_src_dataset_name,
-    transform_key,
+    transform_keys,
     builder,
 ):
     logging.info(f"Fitting transform")
 
-    xfm = builder(variables, key=transform_key)
+    xfm = builder(variables, transform_keys)
 
     model_src_training_split = open_raw_dataset_split(model_src_dataset_name, "train")
     active_dataset_training_split = open_raw_dataset_split(active_dataset_name, "train")
@@ -111,7 +111,7 @@ def _find_or_create_transforms(
     model_src_dataset_name,
     transform_dir,
     input_transform_key,
-    target_transform_key,
+    target_transform_keys,
     evaluation,
 ):
     variables, target_variables = get_variables(model_src_dataset_name)
@@ -131,7 +131,7 @@ def _find_or_create_transforms(
             target_variables,
             active_dataset_name,
             model_src_dataset_name,
-            target_transform_key,
+            target_transform_keys,
             build_target_transform,
         )
     else:
@@ -170,7 +170,7 @@ def _find_or_create_transforms(
                     target_variables,
                     active_dataset_name,
                     model_src_dataset_name,
-                    target_transform_key,
+                    target_transform_keys,
                     build_target_transform,
                 )
                 save_transform(target_transform, target_transform_path)
