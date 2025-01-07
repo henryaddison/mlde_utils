@@ -83,7 +83,6 @@ dependencies:
       - markdown-it-py==2.1.0
       - matplotlib==3.8.2
       - mdurl==0.1.2
-      - mlde-utils==0.0.1
       - more-itertools==9.0.0
       - netcdf4==1.6.5
       - packaging==23.0
