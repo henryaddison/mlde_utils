@@ -1,5 +1,6 @@
 import iris
 import iris.analysis
+import logging
 import xarray as xr
 
 """
@@ -43,7 +44,12 @@ class Regrid:
             src_lat_name = "grid_latitude"
             src_lon_name = "grid_longitude"
         else:
-            raise RuntimeError("Unrecognised grid system")
+            logging.warning(
+                "Unrecognised grid system. Assuming lat-lon, GeogCS(6371229.0)"
+            )
+            src_coord_sys = iris.coord_systems.GeogCS(6371229.0)
+            src_lat_name = "latitude"
+            src_lon_name = "longitude"
 
         if "latitude_longitude" in self.target_ds.variables:
             target_grid_mapping = "latitude_longitude"
