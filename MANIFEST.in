@@ -1,0 +1,1 @@
+include src/mlde_utils/data/target_grids/*/*/moose_grid.nc src/mlde_utils/data/target_grids/60km/*/*/moose_grid.nc
