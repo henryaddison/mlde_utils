@@ -117,9 +117,14 @@ class Regrid:
                     ["time", "bnds"],
                     ds[key].values,
                     ds[key].attrs,
-                    {"units": "hours since 1970-01-01 00:00:00", "calendar": "360_day"},
+                    {
+                        k: ds["time_counter"].encoding[k]
+                        for k in ["units", "calendar"]
+                        if k in ds["time_counter"].encoding
+                    },
                 )
                 for key in ["time_bnds"]
+                if key in ds.variables
             }
         )
 
