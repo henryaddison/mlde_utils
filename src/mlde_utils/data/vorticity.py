@@ -15,8 +15,8 @@ class Vorticity:
             vort_da = mpcalc.vorticity(
                 ds[f"xwind{self.theta}"],
                 ds[f"ywind{self.theta}"],
-                x_dim="longitude",
-                y_dim="latitude",
+                x_dim=ds[f"xwind{self.theta}"].get_axis_num("longitude"),
+                y_dim=ds[f"xwind{self.theta}"].get_axis_num("latitude"),
             )
         elif (
             ds[f"xwind{self.theta}"].attrs["grid_mapping"]
