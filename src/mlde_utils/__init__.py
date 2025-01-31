@@ -37,7 +37,8 @@ class VariableMetadata:
         domain,
         resolution,
         ensemble_member,
-        scenario="rcp85",
+        scenario,
+        collection,
     ):
         self.base_dir = base_dir
         self.variable = variable
@@ -46,11 +47,7 @@ class VariableMetadata:
         self.domain = domain
         self.scenario = scenario
         self.ensemble_member = ensemble_member
-
-        if self.resolution.startswith("2.2km"):
-            self.collection = "land-cpm"
-        elif self.resolution.startswith("60km"):
-            self.collection = "land-gcm"
+        self.collection = collection
 
     def __str__(self):
         return "VariableMetadata: " + str(self.__dict__)
