@@ -13,10 +13,7 @@ class Vorticity:
         logger.info(f"Computing vorticity from xwind{self.theta}, ywind{self.theta}")
         if ds[f"xwind{self.theta}"].attrs["grid_mapping"] == "latitude_longitude":
             vort_da = mpcalc.vorticity(
-                ds[f"xwind{self.theta}"],
-                ds[f"ywind{self.theta}"],
-                x_dim=ds[f"xwind{self.theta}"].get_axis_num("longitude"),
-                y_dim=ds[f"xwind{self.theta}"].get_axis_num("latitude"),
+                ds[f"xwind{self.theta}"], ds[f"ywind{self.theta}"]
             )
         elif (
             ds[f"xwind{self.theta}"].attrs["grid_mapping"]
