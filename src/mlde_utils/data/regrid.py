@@ -118,13 +118,12 @@ class Regrid:
                     ds[key].values,
                     ds[key].attrs,
                     {
-                        k: ds["time_counter"].encoding[k]
+                        k: ds["time"].encoding[k]
                         for k in ["units", "calendar"]
-                        if k in ds["time_counter"].encoding
+                        if k in ds["time"].encoding
                     },
                 )
                 for key in ["time_bnds"]
-                if key in ds.variables
             }
         )
 
