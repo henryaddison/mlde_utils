@@ -13,6 +13,10 @@ class SelectDomain:
     DOMAIN_CENTRES_LON_LAT = {
         "london": (-0.118092, 51.509865),
         "birmingham": (-1.898575, 52.489471),
+        "glasgow": (-4.25763000, 55.86515000),
+        "aberdeen": (-2.09814000, 57.14369000),
+        "scotland": (-4.20264580, 56.49067120),
+        "dublin": (-6.267494, 53.344105),
     }
 
     DOMAIN_CENTRES_RP_LONG_LAT = {
