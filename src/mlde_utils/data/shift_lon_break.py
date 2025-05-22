@@ -10,7 +10,9 @@ class ShiftLonBreak:
 
     def run(self, ds):
         orig_lon_attrs = ds[self.lon_name].attrs
-        ds.coords[self.lon_name] = (ds.coords[self.lon_name] + 180) % 360 - 180
+        ds = ds.assign_coords(
+            {self.lon_name: (((ds.coords[self.lon_name] + 180) % 360) - 180)}
+        )
         ds = ds.sortby(ds[self.lon_name])
         ds[self.lon_name].attrs = orig_lon_attrs
 
