@@ -16,6 +16,9 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+  "cf-xarray"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/henryaddison/mlde_utils"
