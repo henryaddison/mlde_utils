@@ -1,5 +1,6 @@
 import logging
 import math
+import cf_xarray  # noqa: F401
 
 import numpy as np
 
@@ -21,50 +22,35 @@ class SelectDomain:
 
     DOMAIN_CENTRES_RP_LONG_LAT = {
         domain_name: cp_model_rotated_pole.transform_point(
-            *lon_lat, src_crs=platecarree
+            lon + 360, lat, src_crs=platecarree
         )
-        for domain_name, lon_lat in DOMAIN_CENTRES_LON_LAT.items()
+        for domain_name, (lon, lat) in DOMAIN_CENTRES_LON_LAT.items()
     }
 
-    def __init__(self, subdomain, grid="cpm", size=64) -> None:
+    def __init__(self, subdomain, size=64) -> None:
         self.subdomain = subdomain
-        self.grid = grid
         self.size = size
 
     def run(self, ds):
         logger.info(f"Selecting subdomain {self.subdomain}")
-        if self.grid == "cpm":
+        if "rotated_latitude_longitude" in ds.cf.grid_mapping_names:
             centre_xy = self.DOMAIN_CENTRES_RP_LONG_LAT[self.subdomain]
             query = dict(
-                grid_longitude=360.0 + centre_xy[0],
-                grid_latitude=centre_xy[1],
+                X=centre_xy[0],
+                Y=centre_xy[1],
             )
-        elif self.grid == "gcm":
+        elif "latitude_longitude" in ds.cf.grid_mapping_names:
             centre_xy = self.DOMAIN_CENTRES_LON_LAT[self.subdomain]
             query = dict(
-                longitude=centre_xy[0],
-                latitude=centre_xy[1],
+                X=centre_xy[0],
+                Y=centre_xy[1],
             )
         else:
             raise ValueError(f"Unknown grid type: {self.grid}")
 
-        centre_ds = ds.sel(query, method="nearest")
-        if self.grid == "cpm":
-            centre_long_idx = np.where(
-                ds.grid_longitude.values == centre_ds.grid_longitude.values
-            )[0].item()
-            centre_lat_idx = np.where(
-                ds.grid_latitude.values == centre_ds.grid_latitude.values
-            )[0].item()
-        elif self.grid == "gcm":
-            centre_long_idx = np.where(
-                ds.longitude.values == centre_ds.longitude.values
-            )[0].item()
-            centre_lat_idx = np.where(ds.latitude.values == centre_ds.latitude.values)[
-                0
-            ].item()
-        else:
-            raise ValueError(f"Unknown grid type: {self.grid}")
+        centre_ds = ds.cf.sel(query, method="nearest")
+        centre_long_idx = np.where(ds.cf.X.values == centre_ds.cf.X.values)[0].item()
+        centre_lat_idx = np.where(ds.cf.Y.values == centre_ds.cf.Y.values)[0].item()
 
         radius = self.size - 1
         left_length = math.floor(radius / 2.0)
@@ -72,29 +58,15 @@ class SelectDomain:
         down_length = math.floor(radius / 2.0)
         up_length = math.ceil(radius / 2.0)
 
-        if self.grid == "cpm":
-            ds = ds.sel(
-                grid_longitude=slice(
-                    ds.grid_longitude[centre_long_idx - left_length].values,
-                    ds.grid_longitude[centre_long_idx + right_length].values,
-                ),
-                grid_latitude=slice(
-                    ds.grid_latitude[centre_lat_idx - down_length].values,
-                    ds.grid_latitude[centre_lat_idx + up_length].values,
-                ),
-            )
-        elif self.grid == "gcm":
-            ds = ds.sel(
-                longitude=slice(
-                    ds.longitude[centre_long_idx - left_length].values,
-                    ds.longitude[centre_long_idx + right_length].values,
-                ),
-                latitude=slice(
-                    ds.latitude[centre_lat_idx - down_length].values,
-                    ds.latitude[centre_lat_idx + up_length].values,
-                ),
-            )
-        else:
-            raise ValueError(f"Unknown grid type: {self.grid}")
+        ds = ds.cf.sel(
+            X=slice(
+                ds.cf.X[centre_long_idx - left_length].values,
+                ds.cf.X[centre_long_idx + right_length].values,
+            ),
+            Y=slice(
+                ds.cf.Y[centre_lat_idx - down_length].values,
+                ds.cf.Y[centre_lat_idx + up_length].values,
+            ),
+        )
 
         return ds

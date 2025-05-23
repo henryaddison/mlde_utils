@@ -66,6 +66,7 @@ dependencies:
       - build==0.10.0
       - cartopy==0.22.0
       - certifi==2022.12.7
+      - cf-xarray==0.9.4
       - cftime==1.6.3
       - charset-normalizer==3.0.1
       - contourpy==1.2.0
