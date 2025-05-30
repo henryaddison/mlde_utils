@@ -40,6 +40,4 @@ class Vorticity:
         )
         ds[f"vorticity{self.theta}"] = vort_da
 
-        ds = ds.drop_vars([f"xwind{self.theta}", f"ywind{self.theta}"])
-
         return ds
