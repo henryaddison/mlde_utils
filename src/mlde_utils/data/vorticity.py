@@ -2,14 +2,17 @@ import logging
 
 import metpy.calc as mpcalc
 
+from mlde_utils.data import register_action
+
 logger = logging.getLogger(__name__)
 
 
+@register_action(name="vorticity")
 class Vorticity:
     def __init__(self, theta):
         self.theta = theta
 
-    def run(self, ds):
+    def __call__(self, ds):
         logger.info(f"Computing vorticity from xwind{self.theta}, ywind{self.theta}")
         if ds[f"xwind{self.theta}"].attrs["grid_mapping"] == "latitude_longitude":
             vort_da = mpcalc.vorticity(

@@ -1,13 +1,15 @@
 import os
 import tempfile
 from cdo import Cdo
+from mlde_utils.data import register_action
 
 
+@register_action(name="remapcon")
 class Remapcon:
     def __init__(self, target_grid_filepath):
         self.target_grid_filepath = target_grid_filepath
 
-    def run(self, ds):
+    def __call__(self, ds):
         temp_storage_path = os.getenv("TMPDIR", default=tempfile.gettempdir())
         os.makedirs(temp_storage_path, exist_ok=True)
         input_file = tempfile.NamedTemporaryFile(

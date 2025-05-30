@@ -1,10 +1,12 @@
+import datetime
 import logging
 
-import datetime
+from mlde_utils.data import register_action
 
 logger = logging.getLogger(__name__)
 
 
+@register_action(name="resample")
 class Resample:
     def __init__(self, target_frequency):
         self.target_frequency = target_frequency
@@ -14,6 +16,6 @@ class Resample:
         else:
             raise RuntimeError(f"Unknown target frequency {target_frequency}")
 
-    def run(self, ds):
+    def __call__(self, ds):
         logger.info(f"Resampling to {self.target_frequency}")
         return ds.resample(time=self.freq, loffset=self.offset).mean()

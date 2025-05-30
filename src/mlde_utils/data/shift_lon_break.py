@@ -3,12 +3,15 @@ Change longitude from 0-360 to -180 to 180
 so break doesn't appear over UK
 """
 
+from mlde_utils.data import register_action
 
+
+@register_action(name="shift_lon_break")
 class ShiftLonBreak:
     def __init__(self, lon_name="longitude") -> None:
         self.lon_name = lon_name
 
-    def run(self, ds):
+    def __call__(self, ds):
         orig_lon_attrs = ds[self.lon_name].attrs
         ds = ds.assign_coords(
             {self.lon_name: (((ds.coords[self.lon_name] + 180) % 360) - 180)}

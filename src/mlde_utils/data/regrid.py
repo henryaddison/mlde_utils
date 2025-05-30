@@ -2,12 +2,14 @@ import iris
 import iris.analysis
 import logging
 import xarray as xr
+from mlde_utils.data import register_action
 
 """
 Regrid a dataset based on a given target grid file
 """
 
 
+@register_action(name="regrid")
 class Regrid:
 
     SCHEMES = {
@@ -22,7 +24,7 @@ class Regrid:
         self.variables = variables
         self.scheme = self.SCHEMES[scheme]()
 
-    def run(self, ds):
+    def __call__(self, ds):
         # regrid the coarsened data to match the original horizontal grid (using NN interpolation)
         # NB iris and xarray can only comminicate in dataarrays not datasets
         # and form a dataset based on the original hi-res with this new coarsened then NN-gridded data
