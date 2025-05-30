@@ -31,7 +31,7 @@ class SplitByYear:
 
         return f"{start}1201-{end}1130"
 
-    def run(self):
+    def __call__(self):
         output_files = []
 
         for year in self.years:

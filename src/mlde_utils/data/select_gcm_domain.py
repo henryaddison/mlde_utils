@@ -18,7 +18,7 @@ class SelectGCMDomain:
         self.subdomain = subdomain
         self.size = size
 
-    def run(self, ds):
+    def __call__(self, ds):
         logger.info(f"Selecting GCM subdomain {self.subdomain}")
 
         return ds.isel(**self.DOMAIN_CENTRES[self.subdomain][self.size])
