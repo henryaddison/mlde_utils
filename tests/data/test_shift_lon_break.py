@@ -8,7 +8,7 @@ from mlde_utils.data.shift_lon_break import ShiftLonBreak
 def test_shift_lon_break(global_dataset):
     orig_lon_attrs = global_dataset["longitude"].attrs
 
-    ds = ShiftLonBreak().run(global_dataset)
+    ds = ShiftLonBreak()(global_dataset)
 
     assert ds["longitude"].min().values.item() == -180.0
     assert ds["longitude"].max().values.item() == 170.0

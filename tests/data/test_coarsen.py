@@ -13,7 +13,7 @@ def test_coarsen():
     )
     ds = xr.load_dataset(ds_filepath)
 
-    coarsened = Coarsen(scale_factor=2, variable="air_pressure_at_sea_level").run(ds)
+    coarsened = Coarsen(scale_factor=2, variable="air_pressure_at_sea_level")(ds)
 
     expected_value = ds.air_pressure_at_sea_level.values[0:2, 0:2, 0].mean()
 

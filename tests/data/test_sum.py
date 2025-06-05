@@ -10,7 +10,7 @@ def test_sum():
         coords={"x": ["one", "two"], "y": ["a", "b"]},
     )
 
-    summed = Sum(["foo", "bar"], "baz").run(ds)
+    summed = Sum(["foo", "bar"], "baz")(ds)
 
     expected_values = np.array([[3, 6], [9, 12]])
 
