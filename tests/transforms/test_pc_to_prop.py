@@ -60,7 +60,7 @@ def dataset_factory(grid_latitude, grid_longitude) -> Callable[[int, int], xr.Da
 
     def _dataset_factory(start_year: int = 1980, time_len: int = 10) -> xr.Dataset:
         ensemble_member = xr.Variable(
-            ["ensemble_member"], np.array([f"{i:02}" for i in range(3)])
+            ["ensemble_member"], np.array([f"{i:02}" for i in range(3)])  # noqa: E231
         )
 
         time, time_bnds = build_time_dim(start_year=start_year, time_len=time_len)
