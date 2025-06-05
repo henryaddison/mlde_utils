@@ -2,13 +2,13 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from mlde_utils.data.shift_lon_break import ShiftLonBreak
+from mlde_utils.data import get_action
 
 
 def test_shift_lon_break(global_dataset):
     orig_lon_attrs = global_dataset["longitude"].attrs
 
-    ds = ShiftLonBreak()(global_dataset)
+    ds = get_action("shift_lon_break")()(global_dataset)
 
     assert ds["longitude"].min().values.item() == -180.0
     assert ds["longitude"].max().values.item() == 170.0

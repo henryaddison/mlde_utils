@@ -3,7 +3,7 @@ import os
 import pytest
 import xarray as xr
 
-from mlde_utils.data.coarsen import Coarsen
+from mlde_utils.data import get_action
 
 
 @pytest.mark.skip(reason="not getting the expected coarsen calculation correct")
@@ -13,7 +13,9 @@ def test_coarsen():
     )
     ds = xr.load_dataset(ds_filepath)
 
-    coarsened = Coarsen(scale_factor=2, variable="air_pressure_at_sea_level")(ds)
+    coarsened = get_action("coarsen")(
+        scale_factor=2, variable="air_pressure_at_sea_level"
+    )(ds)
 
     expected_value = ds.air_pressure_at_sea_level.values[0:2, 0:2, 0].mean()
 
