@@ -20,3 +20,7 @@ def register_action(cls=None, *, name=None):
         return _register
     else:
         return _register(cls)
+
+
+def get_action(name):
+    return _ACTIONS[name]
