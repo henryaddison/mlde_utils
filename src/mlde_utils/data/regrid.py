@@ -2,7 +2,7 @@ import iris
 import iris.analysis
 import logging
 import xarray as xr
-from mlde_utils.data import register_action
+from mlde_utils.data.actions_registry import register_action
 
 """
 Regrid a dataset based on a given target grid file

@@ -1,7 +1,7 @@
 from importlib.resources import files
 import logging
 
-from mlde_utils.data import register_action
+from mlde_utils.data.actions_registry import register_action
 from mlde_utils.data.remapcon import Remapcon
 from mlde_utils.data.shift_lon_break import ShiftLonBreak
 

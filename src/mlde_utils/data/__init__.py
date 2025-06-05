@@ -1,24 +1,16 @@
-_ACTIONS = {}
-
-
-def register_action(cls=None, *, name=None):
-    """A decorator for registering action classes."""
-
-    def _register(cls):
-        if name is None:
-            local_name = cls.__name__
-        else:
-            local_name = name
-        if local_name in _ACTIONS:
-            raise ValueError(f"Already registered action with name: {local_name}")
-        _ACTIONS[local_name] = cls
-        return cls
-
-    if cls is None:
-        return _register
-    else:
-        return _register(cls)
+from . import coarsen  # noqa: F401
+from . import constrain  # noqa: F401
+from . import diff  # noqa: F401
+from . import regrid  # noqa: F401
+from . import remapcon  # noqa: F401
+from . import resample  # noqa: F401
+from . import select_domain  # noqa: F401
+from . import shift_lon_break  # noqa: F401
+from . import split_by_year  # noqa: F401
+from . import sum  # noqa: F401
+from . import vorticity  # noqa: F401
+from . import actions_registry
 
 
 def get_action(name):
-    return _ACTIONS[name]
+    return actions_registry._ACTIONS[name]

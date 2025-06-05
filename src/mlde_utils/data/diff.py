@@ -2,7 +2,7 @@
 Create a new dataset with a variable formed from the difference of two given
 """
 
-from mlde_utils.data import register_action
+from mlde_utils.data.actions_registry import register_action
 
 
 @register_action(name="diff")

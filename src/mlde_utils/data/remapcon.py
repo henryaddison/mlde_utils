@@ -1,7 +1,7 @@
 import os
 import tempfile
 from cdo import Cdo
-from mlde_utils.data import register_action
+from mlde_utils.data.actions_registry import register_action
 
 
 @register_action(name="remapcon")

@@ -5,7 +5,7 @@ import cf_xarray  # noqa: F401
 import numpy as np
 
 from mlde_utils import cp_model_rotated_pole, platecarree
-from mlde_utils.data import register_action
+from mlde_utils.data.actions_registry import register_action
 
 logger = logging.getLogger(__name__)
 

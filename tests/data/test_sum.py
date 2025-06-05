@@ -1,7 +1,7 @@
 import numpy as np
 import xarray as xr
 
-from mlde_utils.data.sum import Sum
+from mlde_utils.data import get_action
 
 
 def test_sum():
@@ -10,7 +10,7 @@ def test_sum():
         coords={"x": ["one", "two"], "y": ["a", "b"]},
     )
 
-    summed = Sum(["foo", "bar"], "baz")(ds)
+    summed = get_action("sum")(["foo", "bar"], "baz")(ds)
 
     expected_values = np.array([[3, 6], [9, 12]])
 

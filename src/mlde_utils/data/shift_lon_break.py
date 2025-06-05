@@ -3,7 +3,7 @@ Change longitude from 0-360 to -180 to 180
 so break doesn't appear over UK
 """
 
-from mlde_utils.data import register_action
+from mlde_utils.data.actions_registry import register_action
 
 
 @register_action(name="shift_lon_break")
