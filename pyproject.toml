@@ -10,7 +10,7 @@ authors = [
 ]
 description = "A package for shared code between ML downscaling repos"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -30,7 +30,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-test = ["pytest==7.2.1"]
+test = ["pytest"]
 
 [project.urls]
 "Homepage" = "https://github.com/henryaddison/mlde_utils"
@@ -51,10 +51,10 @@ mlde_utils = { path = ".", editable = true }
 
 [tool.pixi.feature.test.dependencies]
 cdo = { version = "*"}
-python = { version = "==3.9.15" }
+python = { version = "3.12.*" }
 
 [tool.pixi.feature.lint.dependencies]
-python = { version = "~=3.9.15" }
+python = { version = "3.12.*" }
 pre-commit = "*"
 flake8 = { version = "==6.0.0" }
 black = { version = "==25.1.0" }
