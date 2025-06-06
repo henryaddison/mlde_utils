@@ -15,5 +15,5 @@ class Sum:
         ds = ds.assign(
             {self.new_variable: lambda x: sum([x[var] for var in self.variables])}
         )
-        ds = ds.drop_vars(self.variables)
+
         return ds
