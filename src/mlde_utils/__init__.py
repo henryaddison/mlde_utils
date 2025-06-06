@@ -70,6 +70,7 @@ class VariableMetadata:
 
     def subdir(self):
         return os.path.join(
+            self.collection,
             self.domain,
             self.resolution,
             self.scenario,
