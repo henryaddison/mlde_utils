@@ -2,6 +2,7 @@
 Create a new dataset with a variable formed from the difference of two given
 """
 
+import logging
 from mlde_utils.data.actions_registry import register_action
 
 
@@ -13,6 +14,7 @@ class Diff:
         self.new_variable = new_variable
 
     def __call__(self, ds):
+        logging.info(f"Difference between {self.left} and {self.right}")
         ds[self.new_variable] = ds[self.left] - ds[self.right]
         ds = ds.drop_vars([self.left, self.right])
         return ds
