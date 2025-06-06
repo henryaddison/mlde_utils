@@ -28,8 +28,7 @@ class Coarsen:
             ds = ShiftLonBreak()(ds)
             ds = ds.assign_attrs(
                 {
-                    "data_resolution": f"{ds.attrs['data_resolution']}-coarsened-gcm",
-                    "grid_resolution": "60km",
+                    "resolution": f"{ds.attrs['resolution']}-coarsened-gcm",
                 }
             )
         else:
@@ -49,8 +48,7 @@ class Coarsen:
 
                 ds = ds.assign_attrs(
                     {
-                        "data_resolution": f"{ds.attrs['data_resolution']}-coarsened-{self.scale_factor}x",
-                        "grid_resolution": f"{ds.attrs['grid_resolution']}-coarsened-{self.scale_factor}x",
+                        "resolution": f"{ds.attrs['resolution']}-coarsened-{self.scale_factor}x",
                     }
                 )
 

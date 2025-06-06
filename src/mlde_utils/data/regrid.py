@@ -34,7 +34,7 @@ class Regrid:
         # NB iris and xarray can only communicate in dataarrays not datasets
         # and form a dataset based on the original hi-res with this new coarsened then NN-gridded data
 
-        if ds.attrs["grid_resolution"] == self.target_grid_resolution:
+        if ds.attrs["resolution"] == self.target_grid_resolution:
             logging.debug("Already on the desired grid resolution, nothing to do")
             return ds
 
@@ -150,7 +150,7 @@ class Regrid:
         ds = ds.assign_attrs(
             {
                 "domain": "uk",
-                "grid_resolution": self.target_grid_resolution,
+                "resolution": f"{ds.attrs['resolution']}-{self.target_grid_resolution}",
             }
         )
 
