@@ -5,7 +5,7 @@ from mlde_utils.data.actions_registry import register_action
 logger = logging.getLogger(__name__)
 
 
-@register_action(name="constrain")
+@register_action(name="query")
 class Constrain:
     def __init__(self, query):
         self.query = query
