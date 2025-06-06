@@ -12,7 +12,6 @@ def register_action(cls=None, *, name=None):
         if local_name in _ACTIONS:
             raise ValueError(f"Already registered action with name: {local_name}")
 
-        print(f"Registering action: {local_name}")
         _ACTIONS[local_name] = cls
         return cls
 
