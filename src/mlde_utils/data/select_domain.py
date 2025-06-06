@@ -72,4 +72,6 @@ class SelectDomain:
         assert len(ds.cf["X"]) == self.size
         assert len(ds.cf["Y"]) == self.size
 
+        ds = ds.assign_attrs({"domain": f"{self.domain}-{self.size}"})
+
         return ds

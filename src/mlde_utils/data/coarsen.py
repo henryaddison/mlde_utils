@@ -14,7 +14,7 @@ class Coarsen:
         self.scale_factor = scale_factor
         self.grid_type = grid_type
 
-    def __call__(self, ds, data_resolution, grid_resolution):
+    def __call__(self, ds):
         logger.info(f"Coarsening by a scale factor of {self.scale_factor}")
 
         if self.scale_factor == "gcm":
@@ -26,8 +26,12 @@ class Coarsen:
             )
             ds = Remapcon(target_grid_filepath)(ds)
             ds = ShiftLonBreak()(ds)
-            data_resolution = f"{data_resolution}-coarsened-gcm"
-            grid_resolution = "60km"
+            ds = ds.assign_attrs(
+                {
+                    "data_resolution": f"{ds.attrs['data_resolution']}-coarsened-gcm",
+                    "grid_resolution": "60km",
+                }
+            )
         else:
             self.scale_factor = int(self.scale_factor)
             if self.scale_factor == 1:
@@ -36,9 +40,6 @@ class Coarsen:
                 )
             else:
                 logger.info(f"Coarsening {self.scale_factor}x...")
-                data_resolution = f"{data_resolution}-coarsened-{self.scale_factor}x"
-                grid_resolution = data_resolution
-
                 # horizontally coarsen the hi resolution data
                 ds = ds.coarsen(
                     grid_latitude=self.scale_factor,
@@ -46,4 +47,11 @@ class Coarsen:
                     boundary="trim",
                 ).mean()
 
-        return ds, data_resolution, grid_resolution
+                ds = ds.assign_attrs(
+                    {
+                        "data_resolution": f"{ds.attrs['data_resolution']}-coarsened-{self.scale_factor}x",
+                        "grid_resolution": f"{ds.attrs['grid_resolution']}-coarsened-{self.scale_factor}x",
+                    }
+                )
+
+        return ds
