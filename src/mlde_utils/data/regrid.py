@@ -1,3 +1,4 @@
+from importlib.resources import files
 import iris
 import iris.analysis
 import logging
@@ -9,7 +10,7 @@ Regrid a dataset based on a given target grid file
 """
 
 
-@register_action(name="regrid")
+@register_action(name="regrid_to_target")
 class Regrid:
 
     SCHEMES = {
@@ -18,7 +19,11 @@ class Regrid:
         "area-weighted": iris.analysis.AreaWeighted,
     }
 
-    def __init__(self, target_grid_filepath, variables, scheme="nn") -> None:
+    def __init__(self, target_grid_resolution, variables, scheme="nn") -> None:
+        self.target_grid_resolution = target_grid_resolution
+        target_grid_filepath = files("mlde_utils.data").joinpath(
+            f"target_grids/{self.target_grid_resolution}/uk/moose_grid.nc"
+        )
         self.target_cube = iris.load_cube(target_grid_filepath)
         self.target_ds = xr.open_dataset(target_grid_filepath)
         self.variables = variables
@@ -26,8 +31,12 @@ class Regrid:
 
     def __call__(self, ds):
         # regrid the coarsened data to match the original horizontal grid (using NN interpolation)
-        # NB iris and xarray can only comminicate in dataarrays not datasets
+        # NB iris and xarray can only communicate in dataarrays not datasets
         # and form a dataset based on the original hi-res with this new coarsened then NN-gridded data
+
+        if ds.attrs["grid_resolution"] == self.target_grid_resolution:
+            logging.debug("Already on the desired grid resolution, nothing to do")
+            return ds
 
         if "latitude_longitude" in ds.variables:
             src_coord_sys = iris.coord_systems.GeogCS(
@@ -137,5 +146,12 @@ class Regrid:
         coords[target_lat_name] = self.target_ds.coords[target_lat_name]
 
         ds = xr.Dataset(vars, coords=coords, attrs=ds.attrs)
+
+        ds = ds.assign_attrs(
+            {
+                "domain": "uk",
+                "grid_resolution": self.target_grid_resolution,
+            }
+        )
 
         return ds
