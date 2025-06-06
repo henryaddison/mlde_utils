@@ -140,3 +140,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# pixi environments
+.pixi
+*.egg-info
+# library so don't include pixi.lock
+pixi.lock
