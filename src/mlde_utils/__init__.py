@@ -7,7 +7,7 @@ import yaml
 import cartopy.crs as ccrs
 import cftime
 
-WORKDIRS_PATH = Path(os.getenv("WORKDIRS"))
+WORKDIRS_PATH = Path(os.getenv("WORKDIRS_PATH"))
 DERIVED_DATA = Path(os.getenv("DERIVED_DATA"))
 
 cp_model_rotated_pole = ccrs.RotatedPole(pole_longitude=177.5, pole_latitude=37.5)
