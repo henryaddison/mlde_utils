@@ -7,6 +7,9 @@ import yaml
 import cartopy.crs as ccrs
 import cftime
 
+WORKDIRS_PATH = Path(os.getenv("WORKDIRS"))
+DERIVED_DATA = Path(os.getenv("DERIVED_DATA"))
+
 cp_model_rotated_pole = ccrs.RotatedPole(pole_longitude=177.5, pole_latitude=37.5)
 platecarree = ccrs.PlateCarree()
 
@@ -106,7 +109,7 @@ class DatasetMetadata:
         return f"DatasetMetadata({self.path()})"
 
     def path(self):
-        return Path(os.getenv("DERIVED_DATA"), "moose", "nc-datasets", self.name)
+        return Path(DERIVED_DATA, "moose", "nc-datasets", self.name)
 
     def splits(self):
         return map(
@@ -128,8 +131,8 @@ class DatasetMetadata:
         return self.config()["ensemble_members"]
 
 
-def workdir_path(fq_run_id: str) -> Path:
-    return Path(os.getenv("DERIVED_DATA"), "workdirs", fq_run_id)
+def workdir_path(fq_run_id: str, base_dir: str = WORKDIRS_PATH) -> Path:
+    return Path(base_dir, fq_run_id)
 
 
 def samples_path(
@@ -149,9 +152,7 @@ def samples_glob(samples_path: Path) -> list[Path]:
     return samples_path.glob("predictions-*.nc")
 
 
-def dataset_path(dataset: str, base_dir: str = None) -> Path:
-    if base_dir is None:
-        base_dir = os.getenv("DERIVED_DATA")
+def dataset_path(dataset: str, base_dir: str = DERIVED_DATA) -> Path:
     return Path(base_dir, "moose", "nc-datasets", dataset)
 
 
