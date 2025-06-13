@@ -4,22 +4,70 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mlde_utils"
-version = "0.2.5"
+version = "0.3.0a8"
 authors = [
   { name="Henry Addison", email="henry.addison@bristol.ac.uk" },
 ]
 description = "A package for shared code between ML downscaling repos"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "cf-xarray"
+  "cartopy",
+  "cdo",
+  "cf-xarray",
+  "cftime",
+  "scitools-iris",
+  "metpy",
+  "netcdf4",
+  "pint",
+  "xarray",
+  "pyyaml",
 ]
+
+[dependency-groups]
+test = ["pytest", "pytest-env"]
 
 [project.urls]
 "Homepage" = "https://github.com/henryaddison/mlde_utils"
 "Bug Tracker" = "https://github.com/henryaddison/mlde_utils/issues"
+
+[tool.pixi.workspace]
+channels = ["conda-forge", "nodefaults"]
+platforms = ["linux-64"]
+
+[tool.pixi.environments]
+default = {features = [], solve-group = "default"}
+test = {features = ["test"], solve-group = "default"}
+# Create a custom environment which only has the `lint` feature
+lint = {features = ["lint"], no-default-feature = true}
+
+[tool.pixi.pypi-dependencies]
+mlde_utils = { path = ".", editable = true }
+
+[tool.pixi.feature.test.dependencies]
+cdo = { version = "*"}
+python = { version = "3.12.*" }
+
+[tool.pixi.feature.lint.dependencies]
+python = { version = "3.12.*" }
+pre-commit = "*"
+flake8 = { version = "==6.0.0" }
+black = { version = "==25.1.0" }
+
+[tool.pixi.feature.test.tasks]
+test = "pytest"
+
+[tool.pixi.feature.lint.tasks]
+lint = "black .; flake8 ."
+
+[tool.pytest_env]
+DERIVED_DATA="/path/to/data/derived"
+WORKDIRS_PATH="/path/to/test/workdirs"
+
+[tool.black]
+target-version = ['py312']
