@@ -102,14 +102,15 @@ class VariableMetadata:
 
 
 class DatasetMetadata:
-    def __init__(self, name):
+    def __init__(self, name, base_dir=DERIVED_DATA):
         self.name = name
+        self.base_dir = base_dir
 
     def __str__(self):
         return f"DatasetMetadata({self.path()})"
 
     def path(self):
-        return Path(DERIVED_DATA, "moose", "nc-datasets", self.name)
+        return Path(self.base_dir, "moose", "nc-datasets", self.name)
 
     def splits(self):
         return map(
@@ -150,20 +151,3 @@ def samples_path(
 
 def samples_glob(samples_path: Path) -> list[Path]:
     return samples_path.glob("predictions-*.nc")
-
-
-def dataset_path(dataset: str, base_dir: str = DERIVED_DATA) -> Path:
-    return Path(base_dir, "moose", "nc-datasets", dataset)
-
-
-def dataset_split_path(dataset: str, split: str, base_dir: str = None) -> Path:
-    return dataset_path(dataset, base_dir=base_dir) / f"{split}.nc"
-
-
-def dataset_config_path(dataset: str, base_dir: str = None) -> Path:
-    return dataset_path(dataset, base_dir=base_dir) / "ds-config.yml"
-
-
-def dataset_config(dataset: str, base_dir: str = None) -> dict:
-    with open(dataset_config_path(dataset, base_dir=base_dir), "r") as f:
-        return yaml.safe_load(f)
