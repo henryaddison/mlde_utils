@@ -153,11 +153,12 @@ class EmulatorOutputMetadata:
         dataset: str,
         split: str,
         ensemble_member: str,
+        config_hash: str,  # missing from older outputs, use None in that case
     ) -> Path:
         """
         Returns the path to the samples for the given parameters.
         """
-        return (
+        path = (
             self.workdir_path()
             / "samples"
             / checkpoint
@@ -166,6 +167,9 @@ class EmulatorOutputMetadata:
             / split
             / ensemble_member
         )
+        if config_hash is not None:
+            path = path / config_hash
+        return path
 
     def samples_glob(self, *args, **kwargs) -> list[Path]:
         """
