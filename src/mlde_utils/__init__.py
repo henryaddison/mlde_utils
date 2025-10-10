@@ -98,7 +98,7 @@ class VariableMetadata:
         filenames = [
             os.path.basename(filepath) for filepath in self.existing_filepaths()
         ]
-        return list([int(filename[-20:-16]) for filename in filenames])
+        return list([int(filename[-11:-7]) for filename in filenames])
 
 
 class DatasetMetadata:
