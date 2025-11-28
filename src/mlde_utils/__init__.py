@@ -110,7 +110,7 @@ class DatasetMetadata:
         return f"DatasetMetadata({self.path()})"
 
     def path(self):
-        return Path(self.base_dir, "moose", "nc-datasets", self.name)
+        return Path(self.base_dir, self.name)
 
     def splits(self):
         return map(
