@@ -7,8 +7,15 @@ import yaml
 import cartopy.crs as ccrs
 import cftime
 
-WORKDIRS_PATH = Path(os.getenv("WORKDIRS_PATH"))
-DERIVED_DATA = Path(os.getenv("DERIVED_DATA"))
+
+DATA_PATH = Path(os.getenv("DATA_PATH"))
+
+DATASETS_PATH = Path(os.getenv("DATASETS_PATH", DATA_PATH / "datasets"))
+VARIABLES_PATH = Path(os.getenv("VARIABLES_PATH", DATA_PATH / "variables"))
+
+RAW_MOOSE_VARIABLES_PATH = VARIABLES_PATH / "raw" / "moose"
+DERIVED_VARIABLES_PATH = VARIABLES_PATH / "derived"
+
 
 cp_model_rotated_pole = ccrs.RotatedPole(pole_longitude=177.5, pole_latitude=37.5)
 platecarree = ccrs.PlateCarree()
@@ -102,7 +109,7 @@ class VariableMetadata:
 
 
 class DatasetMetadata:
-    def __init__(self, name, base_dir=DERIVED_DATA):
+    def __init__(self, name, base_dir=DATASETS_PATH):
         self.name = name
         self.base_dir = base_dir
 
@@ -133,7 +140,7 @@ class DatasetMetadata:
 
 
 class EmulatorOutputMetadata:
-    def __init__(self, fq_run_id: str, base_dir: Path = WORKDIRS_PATH):
+    def __init__(self, fq_run_id: str, base_dir: Path):
         self.base_dir = base_dir
         self.fq_run_id = fq_run_id
 

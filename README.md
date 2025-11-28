@@ -6,5 +6,5 @@
 
 | Name | Description |
 |------|-------------|
-|`DERIVED_DATA`| The base path to where datasets are to be found |
-|`WORKDIRS_PATH`| The common path to where emulator artefacts (including samples) are to be found |
+|`DATA_PATH`| The base path to where data is to be found |
+

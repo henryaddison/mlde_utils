@@ -66,8 +66,8 @@ test = "pytest"
 lint = "black .; flake8 ."
 
 [tool.pytest_env]
-DERIVED_DATA="/path/to/data/derived"
-WORKDIRS_PATH="/path/to/test/workdirs"
+DATA_PATH="/path/to/data"
+
 
 [tool.black]
 target-version = ['py312']
