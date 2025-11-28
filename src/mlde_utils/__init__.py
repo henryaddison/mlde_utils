@@ -7,6 +7,16 @@ import yaml
 import cartopy.crs as ccrs
 import cftime
 
+
+DATA_PATH = Path(os.getenv("DATA_PATH"))
+
+DATASETS_PATH = Path(os.getenv("DATASETS_PATH", DATA_PATH / "datasets"))
+VARIABLES_PATH = Path(os.getenv("VARIABLES_PATH", DATA_PATH / "variables"))
+
+RAW_MOOSE_VARIABLES_PATH = VARIABLES_PATH / "raw" / "moose"
+DERIVED_VARIABLES_PATH = VARIABLES_PATH / "derived"
+
+
 cp_model_rotated_pole = ccrs.RotatedPole(pole_longitude=177.5, pole_latitude=37.5)
 platecarree = ccrs.PlateCarree()
 
@@ -70,6 +80,7 @@ class VariableMetadata:
 
     def subdir(self):
         return os.path.join(
+            self.collection,
             self.domain,
             self.resolution,
             self.scenario,
@@ -94,18 +105,19 @@ class VariableMetadata:
         filenames = [
             os.path.basename(filepath) for filepath in self.existing_filepaths()
         ]
-        return list([int(filename[-20:-16]) for filename in filenames])
+        return list([int(filename[-11:-7]) for filename in filenames])
 
 
 class DatasetMetadata:
-    def __init__(self, name):
+    def __init__(self, name, base_dir=DATASETS_PATH):
         self.name = name
+        self.base_dir = base_dir
 
     def __str__(self):
         return f"DatasetMetadata({self.path()})"
 
     def path(self):
-        return Path(os.getenv("DERIVED_DATA"), "moose", "nc-datasets", self.name)
+        return Path(self.base_dir, self.name)
 
     def splits(self):
         return map(
@@ -127,41 +139,47 @@ class DatasetMetadata:
         return self.config()["ensemble_members"]
 
 
-def workdir_path(fq_run_id: str) -> Path:
-    return Path(os.getenv("DERIVED_DATA"), "workdirs", fq_run_id)
+class EmulatorOutputMetadata:
+    def __init__(self, fq_run_id: str, base_dir: Path):
+        self.base_dir = base_dir
+        self.fq_run_id = fq_run_id
 
+    def workdir_path(self) -> Path:
+        """
+        Returns the path to the emulator output for the given run ID.
+        """
+        return Path(self.base_dir, self.fq_run_id)
 
-def samples_path(
-    workdir: str,
-    checkpoint: str,
-    input_xfm: str,
-    dataset: str,
-    split: str,
-    ensemble_member: str,
-) -> Path:
-    return Path(
-        workdir, "samples", checkpoint, dataset, input_xfm, split, ensemble_member
-    )
+    def __str__(self) -> str:
+        return f"EmulatorOutputMetadata(path={self.workdir_path()})"
 
+    def samples_path(
+        self,
+        checkpoint: str,
+        input_xfm: str,
+        dataset: str,
+        split: str,
+        ensemble_member: str,
+        config_hash: str,  # missing from older outputs, use None in that case
+    ) -> Path:
+        """
+        Returns the path to the samples for the given parameters.
+        """
+        path = (
+            self.workdir_path()
+            / "samples"
+            / checkpoint
+            / dataset
+            / input_xfm
+            / split
+            / ensemble_member
+        )
+        if config_hash is not None:
+            path = path / config_hash
+        return path
 
-def samples_glob(samples_path: Path) -> list[Path]:
-    return samples_path.glob("predictions-*.nc")
-
-
-def dataset_path(dataset: str, base_dir: str = None) -> Path:
-    if base_dir is None:
-        base_dir = os.getenv("DERIVED_DATA")
-    return Path(base_dir, "moose", "nc-datasets", dataset)
-
-
-def dataset_split_path(dataset: str, split: str, base_dir: str = None) -> Path:
-    return dataset_path(dataset, base_dir=base_dir) / f"{split}.nc"
-
-
-def dataset_config_path(dataset: str, base_dir: str = None) -> Path:
-    return dataset_path(dataset, base_dir=base_dir) / "ds-config.yml"
-
-
-def dataset_config(dataset: str, base_dir: str = None) -> dict:
-    with open(dataset_config_path(dataset, base_dir=base_dir), "r") as f:
-        return yaml.safe_load(f)
+    def samples_glob(self, *args, **kwargs) -> list[Path]:
+        """
+        Returns a list of prediction files for the given parameters
+        """
+        return self.samples_path(*args, **kwargs).glob("predictions-*.nc")
