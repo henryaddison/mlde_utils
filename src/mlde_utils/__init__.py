@@ -151,10 +151,9 @@ class FurflexDatasetMetadata:
         return Path(self.base_dir, self.name)
 
     def splits(self):
-        return map(
-            lambda f: os.path.splitext(f)[0],
-            glob.glob("*", root_dir=str(self.path())),
-        )
+        return [
+            p for p in glob.glob("*", root_dir=str(self.path())) if p != "ds-config.yml"
+        ]
 
     def split_path(self, split):
         return self.path() / split
