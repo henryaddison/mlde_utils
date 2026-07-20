@@ -220,3 +220,49 @@ class EmulatorOutputMetadata:
         Returns a list of prediction files for the given parameters
         """
         return self.samples_path(*args, **kwargs).glob("predictions-*.nc")
+
+
+class FurflexEmulatorOutputMetadata:
+    def __init__(self, fq_run_id: str, base_dir: Path):
+        self.base_dir = base_dir
+        self.fq_run_id = fq_run_id
+
+    def workdir_path(self) -> Path:
+        """
+        Returns the path to the emulator output for the given run ID.
+        """
+        return Path(self.base_dir, self.fq_run_id)
+
+    def __str__(self) -> str:
+        return f"FurflexEmulatorOutputMetadata(path={self.workdir_path()})"
+
+    def samples_path(
+        self,
+        checkpoint: str,
+        input_xfm: str,
+        dataset: str,
+        split: str,
+        ensemble_member: str,
+        config_hash: str,  # missing from older outputs, use None in that case
+    ) -> Path:
+        """
+        Returns the path to the samples for the given parameters.
+        """
+        path = (
+            self.workdir_path()
+            / "samples"
+            / checkpoint
+            / dataset
+            # / input_xfm
+            / split
+            / ensemble_member
+        )
+        if config_hash is not None:
+            path = path / config_hash
+        return path
+
+    def samples_glob(self, *args, **kwargs) -> list[Path]:
+        """
+        Returns a list of prediction files for the given parameters
+        """
+        return self.samples_path(*args, **kwargs).glob("*/predictions.zarr")
