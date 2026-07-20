@@ -165,15 +165,12 @@ class FurflexDatasetMetadata:
     def predictors_split_path(self, split):
         return self.split_path(split) / "predictors.zarr"
 
-    # def config_path(self) -> Path:
-    #     return self.path() / "ds-config.yml"
+    def config_path(self) -> Path:
+        return self.path() / "ds-config.yml"
 
-    # def config(self) -> dict:
-    #     with open(self.config_path(), "r") as f:
-    #         return yaml.safe_load(f)
-
-    # def ensemble_members(self) -> list[str]:
-    #     return self.config()["ensemble_members"]
+    def config(self) -> dict:
+        with open(self.config_path(), "r") as f:
+            return yaml.safe_load(f)
 
 
 class EmulatorOutputMetadata:
