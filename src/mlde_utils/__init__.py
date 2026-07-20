@@ -139,6 +139,43 @@ class DatasetMetadata:
         return self.config()["ensemble_members"]
 
 
+class FurflexDatasetMetadata:
+    def __init__(self, name, base_dir=DATASETS_PATH):
+        self.name = name
+        self.base_dir = base_dir
+
+    def __str__(self):
+        return f"FurflexDatasetMetadata({self.path()})"
+
+    def path(self):
+        return Path(self.base_dir, self.name)
+
+    def splits(self):
+        return map(
+            lambda f: os.path.splitext(f)[0],
+            glob.glob("*", root_dir=str(self.path())),
+        )
+
+    def split_path(self, split):
+        return self.path() / split
+
+    def predictands_split_path(self, split):
+        return self.split_path(split) / "predictands.zarr"
+
+    def predictors_split_path(self, split):
+        return self.split_path(split) / "predictors.zarr"
+
+    # def config_path(self) -> Path:
+    #     return self.path() / "ds-config.yml"
+
+    # def config(self) -> dict:
+    #     with open(self.config_path(), "r") as f:
+    #         return yaml.safe_load(f)
+
+    # def ensemble_members(self) -> list[str]:
+    #     return self.config()["ensemble_members"]
+
+
 class EmulatorOutputMetadata:
     def __init__(self, fq_run_id: str, base_dir: Path):
         self.base_dir = base_dir
