@@ -19,6 +19,7 @@ DERIVED_VARIABLES_PATH = VARIABLES_PATH / "derived"
 
 cp_model_rotated_pole = ccrs.RotatedPole(pole_longitude=177.5, pole_latitude=37.5)
 platecarree = ccrs.PlateCarree()
+osgb_crs = ccrs.OSGB()
 
 DEFAULT_ENSEMBLE_MEMBER = "01"
 
