@@ -25,16 +25,24 @@ DEFAULT_ENSEMBLE_MEMBER = "01"
 
 TIME_PERIODS = {
     "historic": (
-        cftime.Datetime360Day(1980, 12, 1, 12, 0, 0, 0, has_year_zero=True),
-        cftime.Datetime360Day(2000, 11, 30, 12, 0, 0, 0, has_year_zero=True),
+        cftime.Datetime360Day(1980, 12, 1, 0, 0, 0, 0, has_year_zero=True),
+        cftime.Datetime360Day(2000, 11, 30, 23, 59, 0, 0, has_year_zero=True),
+    ),
+    "recent": (
+        cftime.Datetime360Day(2000, 12, 1, 0, 0, 0, 0, has_year_zero=True),
+        cftime.Datetime360Day(2020, 11, 30, 23, 59, 0, 0, has_year_zero=True),
     ),
     "present": (
-        cftime.Datetime360Day(2020, 12, 1, 12, 0, 0, 0, has_year_zero=True),
-        cftime.Datetime360Day(2040, 11, 30, 12, 0, 0, 0, has_year_zero=True),
+        cftime.Datetime360Day(2020, 12, 1, 0, 0, 0, 0, has_year_zero=True),
+        cftime.Datetime360Day(2040, 11, 30, 23, 59, 0, 0, has_year_zero=True),
+    ),
+    "soon": (
+        cftime.Datetime360Day(2040, 12, 1, 0, 0, 0, 0, has_year_zero=True),
+        cftime.Datetime360Day(2060, 11, 30, 23, 59, 0, 0, has_year_zero=True),
     ),
     "future": (
-        cftime.Datetime360Day(2060, 12, 1, 12, 0, 0, 0, has_year_zero=True),
-        cftime.Datetime360Day(2080, 11, 30, 12, 0, 0, 0, has_year_zero=True),
+        cftime.Datetime360Day(2060, 12, 1, 0, 0, 0, 0, has_year_zero=True),
+        cftime.Datetime360Day(2080, 11, 30, 23, 59, 0, 0, has_year_zero=True),
     ),
 }
 
