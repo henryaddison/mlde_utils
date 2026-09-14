@@ -10,7 +10,7 @@ authors = [
 ]
 description = "A package for shared code between ML downscaling repos"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -38,7 +38,8 @@ test = ["pytest", "pytest-env"]
 
 [tool.pixi.workspace]
 channels = ["conda-forge", "nodefaults"]
-platforms = ["linux-64"]
+platforms = ["linux-64", "linux-aarch64"]
+
 
 [tool.pixi.environments]
 default = {features = [], solve-group = "default"}
