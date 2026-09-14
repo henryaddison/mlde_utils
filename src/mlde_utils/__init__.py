@@ -228,46 +228,57 @@ class EmulatorOutputMetadata:
 
 
 class FurflexEmulatorOutputMetadata:
-    def __init__(self, fq_run_id: str, base_dir: Path):
-        self.base_dir = base_dir
-        self.fq_run_id = fq_run_id
+    def __init__(
+        self, workdir: str = None, fq_run_id: str = None, base_dir: Path = None
+    ):
+        if workdir is not None and (fq_run_id is not None or base_dir is not None):
+            raise ValueError(
+                "Provide either workdir or both of fq_run_id and base_dir but cannot use together"
+            )
+        elif workdir is None and (fq_run_id is None or base_dir is None):
+            raise ValueError("Both fq_run_id and base_dir must be provided.")
 
-    def workdir_path(self) -> Path:
-        """
-        Returns the path to the emulator output for the given run ID.
-        """
-        return Path(self.base_dir, self.fq_run_id)
+        if workdir is not None:
+            self.workdir = Path(workdir)
+        else:
+            self.workdir = Path(self.base_dir, self.fq_run_id)
 
     def __str__(self) -> str:
-        return f"FurflexEmulatorOutputMetadata(path={self.workdir_path()})"
+        return f"FurflexEmulatorOutputMetadata(path={self.workdir})"
 
-    def samples_path(
+    def samples_dirpath(
         self,
-        checkpoint: str,
-        input_xfm: str,
-        dataset: str,
-        split: str,
-        ensemble_member: str,
-        config_hash: str,  # missing from older outputs, use None in that case
+        checkpoint: str,  # checkpoint of the emulator used
+        dataset: str,  # dataset sampled against
+        split: str,  # split of the dataset sampled against
+        config_hash: str,  # description of the configuration of the emulator used to generate the samples (which may deviate from training configuration in some ways)
+        sample_run_id: str,  # a shared identifier for a set of samples generated from the same emulator checkpoint and sampling config and dataset, but with different ensemble members
     ) -> Path:
         """
-        Returns the path to the samples for the given parameters.
+        Returns the path to the samples for a given sample run.
         """
         path = (
             self.workdir_path()
             / "samples"
             / checkpoint
             / dataset
-            # / input_xfm
             / split
-            / ensemble_member
+            / config_hash
+            / sample_run_id
         )
-        if config_hash is not None:
-            path = path / config_hash
+
         return path
 
-    def samples_glob(self, *args, **kwargs) -> list[Path]:
+    def samples_path(self, ensemble_member: str, *args, **kwargs) -> Path:
         """
-        Returns a list of prediction files for the given parameters
+        Returns path to the predictions.zarr file for a given sample run and ensemble member.
         """
-        return self.samples_path(*args, **kwargs).glob("*/predictions.zarr")
+        return (
+            self.samples_dirpath(*args, **kwargs) / ensemble_member / "predictions.zarr"
+        )
+
+    def samples_stats_path(self, *args, **kwargs) -> Path:
+        """
+        Returns path to the pre-computed stats for a given sample run.
+        """
+        return self.samples_dirpath(*args, **kwargs) / "stats.zarr"
