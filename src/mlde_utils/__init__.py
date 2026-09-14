@@ -246,39 +246,41 @@ class FurflexEmulatorOutputMetadata:
     def __str__(self) -> str:
         return f"FurflexEmulatorOutputMetadata(path={self.workdir})"
 
-    def samples_dirpath(
+    def sample_set_dirpath(
         self,
         checkpoint: str,  # checkpoint of the emulator used
         dataset: str,  # dataset sampled against
         split: str,  # split of the dataset sampled against
         config_hash: str,  # description of the configuration of the emulator used to generate the samples (which may deviate from training configuration in some ways)
-        sample_run_id: str,  # a shared identifier for a set of samples generated from the same emulator checkpoint and sampling config and dataset, but with different ensemble members
     ) -> Path:
         """
-        Returns the path to the samples for a given sample run.
+        Returns the path to the sample runs directory.
         """
-        path = (
-            self.workdir_path()
-            / "samples"
-            / checkpoint
-            / dataset
-            / split
-            / config_hash
-            / sample_run_id
-        )
+        return self.workdir / "samples" / checkpoint / dataset / split / config_hash
 
-        return path
+    def sample_run_dirpath(
+        self,
+        sample_run_id: str,  # a shared identifier for a set of samples generated from the same emulator checkpoint and sampling config and dataset
+        *args,
+        **kwargs,
+    ) -> Path:
+        """
+        Returns the path to the samples directory for a given sample run.
+        """
+        return self.sample_set_dirpath(*args, **kwargs) / sample_run_id
 
     def samples_path(self, ensemble_member: str, *args, **kwargs) -> Path:
         """
         Returns path to the predictions.zarr file for a given sample run and ensemble member.
         """
         return (
-            self.samples_dirpath(*args, **kwargs) / ensemble_member / "predictions.zarr"
+            self.sample_run_dirpath(*args, **kwargs)
+            / ensemble_member
+            / "predictions.zarr"
         )
 
     def samples_stats_path(self, *args, **kwargs) -> Path:
         """
         Returns path to the pre-computed stats for a given sample run.
         """
-        return self.samples_dirpath(*args, **kwargs) / "stats.zarr"
+        return self.sample_run_dirpath(*args, **kwargs) / "stats.zarr"
