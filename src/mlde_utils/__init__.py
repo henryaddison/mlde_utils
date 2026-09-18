@@ -241,7 +241,7 @@ class FurflexEmulatorOutputMetadata:
         if workdir is not None:
             self.workdir = Path(workdir)
         else:
-            self.workdir = Path(self.base_dir, self.fq_run_id)
+            self.workdir = Path(base_dir, fq_run_id)
 
     def __str__(self) -> str:
         return f"FurflexEmulatorOutputMetadata(path={self.workdir})"
