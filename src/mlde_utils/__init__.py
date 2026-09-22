@@ -279,8 +279,8 @@ class FurflexEmulatorOutputMetadata:
             / "predictions.zarr"
         )
 
-    def samples_stats_path(self, *args, **kwargs) -> Path:
+    def sample_run_eval_stats_path(self, *args, **kwargs) -> Path:
         """
         Returns path to the pre-computed stats for a given sample run.
         """
-        return self.sample_run_dirpath(*args, **kwargs) / "stats.zarr"
+        return self.sample_run_dirpath(*args, **kwargs) / "eval_stats.zarr"
