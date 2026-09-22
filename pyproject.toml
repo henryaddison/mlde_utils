@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mlde_utils"
-version = "0.3.5"
+version = "0.4.0a3"
 authors = [
   { name="Henry Addison", email="henry.addison@bristol.ac.uk" },
 ]
 description = "A package for shared code between ML downscaling repos"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -38,7 +38,8 @@ test = ["pytest", "pytest-env"]
 
 [tool.pixi.workspace]
 channels = ["conda-forge", "nodefaults"]
-platforms = ["linux-64"]
+platforms = ["linux-64", "linux-aarch64"]
+
 
 [tool.pixi.environments]
 default = {features = [], solve-group = "default"}
